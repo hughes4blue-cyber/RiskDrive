@@ -86,8 +86,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <div className="px-5 py-3 border-t border-[hsl(222,47%,16%)]">
-          <div className="text-[hsl(215,20%,40%)] text-[10px]">Powered by Fleetylitics Telematics</div>
-          <div className="text-[hsl(215,20%,35%)] text-[10px]">v2.4.1 • Telematics Agnostic</div>
+          <div className="text-[hsl(215,20%,50%)] text-[10px] font-semibold">Alliant Insurance Services</div>
+          <div className="text-[hsl(215,20%,40%)] text-[10px]">Powered by FleetLytics</div>
+          <div className="text-[hsl(215,20%,35%)] text-[10px]">Telematics Agnostic Platform</div>
         </div>
       </aside>
 

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle, FileText } from "lucide-react";
+import { AlertTriangle, CheckCircle, FileText, Zap } from "lucide-react";
 import { useListAccidents, useInitiateClaim, getListAccidentsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,19 +37,22 @@ function ClaimDialog({ accidentId, onClose }: { accidentId: number; onClose: () 
       data: { claimNumber },
     }, {
       onSuccess: () => {
-        toast({ title: "Claim initiated", description: `Claim ${claimNumber} has been opened.` });
+        toast({ title: "FNOL Submitted", description: `Claim ${claimNumber} has been opened and reported to the carrier.` });
         qc.invalidateQueries({ queryKey: getListAccidentsQueryKey({}) });
         onClose();
       },
-      onError: () => toast({ title: "Error", description: "Failed to initiate claim", variant: "destructive" }),
+      onError: () => toast({ title: "Error", description: "Failed to submit FNOL", variant: "destructive" }),
     });
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-3 py-2">
+        <div className="text-xs text-muted-foreground bg-blue-50 border border-blue-100 rounded-md px-3 py-2">
+          Collision detection has triggered this FNOL. Submitting will report this incident to the carrier, Alliant, or your internal claims team. Telematics data will be attached automatically for faster adjudication.
+        </div>
         <div>
-          <Label className="text-xs">Claim Number</Label>
+          <Label className="text-xs">Claim / FNOL Reference Number</Label>
           <Input
             data-testid="input-claim-number"
             className="mt-1 h-8 text-sm"
@@ -63,7 +66,7 @@ function ClaimDialog({ accidentId, onClose }: { accidentId: number; onClose: () 
       <DialogFooter className="mt-4">
         <Button type="button" variant="outline" size="sm" onClick={onClose}>Cancel</Button>
         <Button data-testid="button-confirm-claim" type="submit" size="sm" disabled={initiate.isPending}>
-          {initiate.isPending ? "Initiating..." : "Initiate Claim"}
+          {initiate.isPending ? "Submitting FNOL..." : "Submit First Notice of Loss"}
         </Button>
       </DialogFooter>
     </form>
@@ -81,8 +84,8 @@ export default function Accidents() {
   return (
     <div>
       <PageHeader
-        title="Accident Alerts"
-        subtitle="Telematics-triggered accident alerts across the network — initiate claims immediately"
+        title="Accident Alerts & FNOL"
+        subtitle="Collision-detection alerts across the network — submit First Notice of Loss immediately from telematics data"
       />
       <div className="p-6 space-y-4">
         {/* Status filter */}
@@ -149,9 +152,10 @@ export default function Accidents() {
                         data-testid={`button-initiate-claim-${acc.id}`}
                         size="sm"
                         onClick={() => setClaimAccidentId(acc.id)}
-                        className="text-xs"
+                        className="text-xs gap-1.5"
                       >
-                        Initiate Claim
+                        <Zap className="w-3 h-3" />
+                        File FNOL
                       </Button>
                     )}
                     {acc.status === "resolved" && (
@@ -176,7 +180,7 @@ export default function Accidents() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <FileText className="w-4 h-4" /> Initiate Insurance Claim
+              <Zap className="w-4 h-4 text-blue-600" /> First Notice of Loss (FNOL)
             </DialogTitle>
           </DialogHeader>
           {claimAccidentId !== null && (
