@@ -1,22 +1,39 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Affinity Risk Solutions for AAA Clubs - Telematics Insurance Platform
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: clubs
+    description: AAA Club operations
+  - name: facilities
+    description: Towing Facility operations
+  - name: drivers
+    description: Driver operations
+  - name: vehicles
+    description: Vehicle/Truck operations
+  - name: telematics
+    description: Telematics event operations
+  - name: risk
+    description: Risk score operations
+  - name: certificates
+    description: Certificate of Insurance operations
+  - name: accidents
+    description: Accident alert and claims operations
+  - name: dashboard
+    description: Dashboard summary operations
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +41,538 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Clubs ───────────────────────────────────────────────────────────────────
+  /clubs:
+    get:
+      operationId: listClubs
+      tags: [clubs]
+      summary: List all AAA Clubs
+      responses:
+        "200":
+          description: List of clubs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Club"
+
+  /clubs/{clubId}:
+    get:
+      operationId: getClub
+      tags: [clubs]
+      summary: Get club by ID
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Club
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Club"
+
+  /clubs/{clubId}/summary:
+    get:
+      operationId: getClubSummary
+      tags: [clubs]
+      summary: Get risk summary for a club across all facilities
+      parameters:
+        - name: clubId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Club summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubSummary"
+
+  # ─── Facilities ───────────────────────────────────────────────────────────────
+  /facilities:
+    get:
+      operationId: listFacilities
+      tags: [facilities]
+      summary: List towing facilities, optionally filtered by club
+      parameters:
+        - name: clubId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of facilities
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Facility"
+
+  /facilities/{facilityId}:
+    get:
+      operationId: getFacility
+      tags: [facilities]
+      summary: Get facility by ID
+      parameters:
+        - name: facilityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Facility
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Facility"
+
+  /facilities/{facilityId}/summary:
+    get:
+      operationId: getFacilitySummary
+      tags: [facilities]
+      summary: Get aggregated risk summary for a facility
+      parameters:
+        - name: facilityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Facility summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FacilitySummary"
+
+  # ─── Drivers ─────────────────────────────────────────────────────────────────
+  /drivers:
+    get:
+      operationId: listDrivers
+      tags: [drivers]
+      summary: List drivers, optionally filtered by facility
+      parameters:
+        - name: facilityId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of drivers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Driver"
+
+  /drivers/{driverId}:
+    get:
+      operationId: getDriver
+      tags: [drivers]
+      summary: Get driver by ID
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Driver
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Driver"
+
+  /drivers/{driverId}/behavior:
+    get:
+      operationId: getDriverBehavior
+      tags: [drivers]
+      summary: Get detailed behavior analysis for a driver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Driver behavior details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DriverBehavior"
+
+  # ─── Vehicles ─────────────────────────────────────────────────────────────────
+  /vehicles:
+    get:
+      operationId: listVehicles
+      tags: [vehicles]
+      summary: List vehicles, optionally filtered by facility
+      parameters:
+        - name: facilityId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Vehicle"
+
+  /vehicles/{vehicleId}:
+    get:
+      operationId: getVehicle
+      tags: [vehicles]
+      summary: Get vehicle by ID
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Vehicle
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vehicle"
+
+  /vehicles/{vehicleId}/telematics:
+    get:
+      operationId: getVehicleTelematics
+      tags: [vehicles]
+      summary: Get recent telematics events for a vehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Telematics events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelematicsEvent"
+
+  # ─── Risk Scores ──────────────────────────────────────────────────────────────
+  /risk/facility/{facilityId}:
+    get:
+      operationId: getFacilityRiskScore
+      tags: [risk]
+      summary: Get current risk score for a facility
+      parameters:
+        - name: facilityId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScore"
+
+  /risk/driver/{driverId}:
+    get:
+      operationId: getDriverRiskScore
+      tags: [risk]
+      summary: Get current risk score for a driver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScore"
+
+  /risk/vehicle/{vehicleId}:
+    get:
+      operationId: getVehicleRiskScore
+      tags: [risk]
+      summary: Get current risk score for a vehicle
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Risk score
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RiskScore"
+
+  /risk/suggestions/{driverId}:
+    get:
+      operationId: getDriverSuggestions
+      tags: [risk]
+      summary: Get behavior modification suggestions for a driver
+      parameters:
+        - name: driverId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BehaviorSuggestion"
+
+  # ─── Certificates of Insurance ────────────────────────────────────────────────
+  /certificates:
+    get:
+      operationId: listCertificates
+      tags: [certificates]
+      summary: List certificates of insurance, optionally filtered by facility
+      parameters:
+        - name: facilityId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of certificates
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Certificate"
+
+    post:
+      operationId: uploadCertificate
+      tags: [certificates]
+      summary: Upload a new certificate of insurance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CertificateInput"
+      responses:
+        "201":
+          description: Certificate uploaded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+
+  /certificates/{certificateId}:
+    get:
+      operationId: getCertificate
+      tags: [certificates]
+      summary: Get certificate by ID
+      parameters:
+        - name: certificateId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Certificate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+
+  # ─── Accidents & Claims ───────────────────────────────────────────────────────
+  /accidents:
+    get:
+      operationId: listAccidents
+      tags: [accidents]
+      summary: List accident alerts, optionally filtered by facility
+      parameters:
+        - name: facilityId
+          in: query
+          schema:
+            type: integer
+        - name: status
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of accidents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Accident"
+
+    post:
+      operationId: reportAccident
+      tags: [accidents]
+      summary: Report a new accident alert from telematics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccidentInput"
+      responses:
+        "201":
+          description: Accident reported
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Accident"
+
+  /accidents/{accidentId}:
+    get:
+      operationId: getAccident
+      tags: [accidents]
+      summary: Get accident by ID
+      parameters:
+        - name: accidentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Accident
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Accident"
+
+  /accidents/{accidentId}/initiate-claim:
+    post:
+      operationId: initiateClaim
+      tags: [accidents]
+      summary: Initiate a claim for an accident
+      parameters:
+        - name: accidentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClaimInput"
+      responses:
+        "200":
+          description: Claim initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Accident"
+
+  # ─── Dashboard ────────────────────────────────────────────────────────────────
+  /dashboard/overview:
+    get:
+      operationId: getDashboardOverview
+      tags: [dashboard]
+      summary: Get platform-wide overview metrics
+      responses:
+        "200":
+          description: Platform overview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardOverview"
+
+  /dashboard/risk-distribution:
+    get:
+      operationId: getRiskDistribution
+      tags: [dashboard]
+      summary: Get risk score distribution across all facilities
+      responses:
+        "200":
+          description: Risk distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/RiskDistributionItem"
+
+  /dashboard/recent-accidents:
+    get:
+      operationId: getRecentAccidents
+      tags: [dashboard]
+      summary: Get recent accident alerts across all facilities
+      responses:
+        "200":
+          description: Recent accidents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Accident"
+
+  /dashboard/top-risk-drivers:
+    get:
+      operationId: getTopRiskDrivers
+      tags: [dashboard]
+      summary: Get highest risk drivers across the platform
+      responses:
+        "200":
+          description: Top risk drivers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DriverRiskItem"
+
+  /dashboard/telematics-activity:
+    get:
+      operationId: getTelematicsActivity
+      tags: [dashboard]
+      summary: Get telematics activity trend over last 30 days
+      responses:
+        "200":
+          description: Telematics activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityPoint"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +583,493 @@ components:
       required:
         - status
 
+    Club:
+      type: object
+      required: [id, name, state, region, totalFacilities, avgRiskScore, status]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        state:
+          type: string
+        region:
+          type: string
+        totalFacilities:
+          type: integer
+        avgRiskScore:
+          type: number
+        status:
+          type: string
+          enum: [active, review, suspended]
+        contactName:
+          type: ["string", "null"]
+        contactEmail:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    ClubSummary:
+      type: object
+      required: [clubId, totalFacilities, totalDrivers, totalVehicles, avgRiskScore, highRiskCount, openAccidents, certificatesExpiringSoon]
+      properties:
+        clubId:
+          type: integer
+        totalFacilities:
+          type: integer
+        totalDrivers:
+          type: integer
+        totalVehicles:
+          type: integer
+        avgRiskScore:
+          type: number
+        highRiskCount:
+          type: integer
+        openAccidents:
+          type: integer
+        certificatesExpiringSoon:
+          type: integer
+
+    Facility:
+      type: object
+      required: [id, clubId, name, address, city, state, ownerName, riskScore, riskTier, status, totalDrivers, totalVehicles]
+      properties:
+        id:
+          type: integer
+        clubId:
+          type: integer
+        clubName:
+          type: string
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        ownerName:
+          type: string
+        ownerEmail:
+          type: ["string", "null"]
+        ownerPhone:
+          type: ["string", "null"]
+        riskScore:
+          type: number
+        riskTier:
+          type: string
+          enum: [low, moderate, high, critical]
+        status:
+          type: string
+          enum: [active, suspended, pending]
+        totalDrivers:
+          type: integer
+        totalVehicles:
+          type: integer
+        certStatus:
+          type: string
+          enum: [current, expiring_soon, expired, missing]
+        createdAt:
+          type: string
+
+    FacilitySummary:
+      type: object
+      required: [facilityId, avgRiskScore, riskTier, totalDrivers, totalVehicles, activeVehicles, totalMiles, hardBrakingEvents, harshAccelerationEvents, speedingEvents, openAccidents, premiumEstimate]
+      properties:
+        facilityId:
+          type: integer
+        avgRiskScore:
+          type: number
+        riskTier:
+          type: string
+        totalDrivers:
+          type: integer
+        totalVehicles:
+          type: integer
+        activeVehicles:
+          type: integer
+        totalMiles:
+          type: number
+        hardBrakingEvents:
+          type: integer
+        harshAccelerationEvents:
+          type: integer
+        speedingEvents:
+          type: integer
+        openAccidents:
+          type: integer
+        premiumEstimate:
+          type: number
+
+    Driver:
+      type: object
+      required: [id, facilityId, firstName, lastName, licenseNumber, status, riskScore, riskTier, totalMiles, totalTrips]
+      properties:
+        id:
+          type: integer
+        facilityId:
+          type: integer
+        facilityName:
+          type: ["string", "null"]
+        firstName:
+          type: string
+        lastName:
+          type: string
+        licenseNumber:
+          type: string
+        phone:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, inactive, suspended]
+        riskScore:
+          type: number
+        riskTier:
+          type: string
+          enum: [low, moderate, high, critical]
+        totalMiles:
+          type: number
+        totalTrips:
+          type: integer
+        hireDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    DriverBehavior:
+      type: object
+      required: [driverId, riskScore, hardBrakingCount, harshAccelerationCount, speedingCount, phoneUsageCount, nightDrivingHours, avgSpeed, maxSpeed, totalMiles]
+      properties:
+        driverId:
+          type: integer
+        riskScore:
+          type: number
+        hardBrakingCount:
+          type: integer
+        harshAccelerationCount:
+          type: integer
+        speedingCount:
+          type: integer
+        phoneUsageCount:
+          type: integer
+        nightDrivingHours:
+          type: number
+        avgSpeed:
+          type: number
+        maxSpeed:
+          type: number
+        totalMiles:
+          type: number
+        trend:
+          type: string
+          enum: [improving, stable, worsening]
+
+    Vehicle:
+      type: object
+      required: [id, facilityId, make, model, year, licensePlate, vin, type, status, riskScore, riskTier, totalMiles, assignedDriverId]
+      properties:
+        id:
+          type: integer
+        facilityId:
+          type: integer
+        facilityName:
+          type: ["string", "null"]
+        make:
+          type: string
+        model:
+          type: string
+        year:
+          type: integer
+        licensePlate:
+          type: string
+        vin:
+          type: string
+        type:
+          type: string
+          enum: [flatbed, wheel_lift, integrated, rotator, heavy_duty]
+        status:
+          type: string
+          enum: [active, inactive, maintenance]
+        riskScore:
+          type: number
+        riskTier:
+          type: string
+          enum: [low, moderate, high, critical]
+        totalMiles:
+          type: number
+        assignedDriverId:
+          type: ["integer", "null"]
+        assignedDriverName:
+          type: ["string", "null"]
+        telematicsDeviceId:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    TelematicsEvent:
+      type: object
+      required: [id, vehicleId, driverId, eventType, severity, latitude, longitude, speed, timestamp]
+      properties:
+        id:
+          type: integer
+        vehicleId:
+          type: integer
+        driverId:
+          type: ["integer", "null"]
+        eventType:
+          type: string
+          enum: [hard_braking, harsh_acceleration, speeding, phone_usage, sharp_turn, fatigue_detected, accident]
+        severity:
+          type: string
+          enum: [low, medium, high, critical]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        speed:
+          type: number
+        timestamp:
+          type: string
+        notes:
+          type: ["string", "null"]
+
+    RiskScore:
+      type: object
+      required: [entityId, entityType, score, tier, change30d, factors]
+      properties:
+        entityId:
+          type: integer
+        entityType:
+          type: string
+          enum: [facility, driver, vehicle]
+        score:
+          type: number
+        tier:
+          type: string
+          enum: [low, moderate, high, critical]
+        change30d:
+          type: number
+        factors:
+          type: array
+          items:
+            $ref: "#/components/schemas/RiskFactor"
+        calculatedAt:
+          type: string
+
+    RiskFactor:
+      type: object
+      required: [name, impact, value]
+      properties:
+        name:
+          type: string
+        impact:
+          type: string
+          enum: [low, medium, high]
+        value:
+          type: string
+        description:
+          type: ["string", "null"]
+
+    BehaviorSuggestion:
+      type: object
+      required: [id, driverId, category, priority, title, description, expectedImpact]
+      properties:
+        id:
+          type: integer
+        driverId:
+          type: integer
+        category:
+          type: string
+          enum: [speeding, braking, acceleration, phone_usage, fatigue, route_planning]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        title:
+          type: string
+        description:
+          type: string
+        expectedImpact:
+          type: string
+
+    Certificate:
+      type: object
+      required: [id, facilityId, policyNumber, insurer, coverageType, coverageAmount, effectiveDate, expirationDate, status]
+      properties:
+        id:
+          type: integer
+        facilityId:
+          type: integer
+        facilityName:
+          type: ["string", "null"]
+        policyNumber:
+          type: string
+        insurer:
+          type: string
+        coverageType:
+          type: string
+        coverageAmount:
+          type: number
+        effectiveDate:
+          type: string
+        expirationDate:
+          type: string
+        status:
+          type: string
+          enum: [current, expiring_soon, expired]
+        fileUrl:
+          type: ["string", "null"]
+        uploadedAt:
+          type: string
+
+    CertificateInput:
+      type: object
+      required: [facilityId, policyNumber, insurer, coverageType, coverageAmount, effectiveDate, expirationDate]
+      properties:
+        facilityId:
+          type: integer
+        policyNumber:
+          type: string
+        insurer:
+          type: string
+        coverageType:
+          type: string
+        coverageAmount:
+          type: number
+        effectiveDate:
+          type: string
+        expirationDate:
+          type: string
+        fileUrl:
+          type: ["string", "null"]
+
+    Accident:
+      type: object
+      required: [id, vehicleId, driverId, facilityId, latitude, longitude, severity, status, alertedAt]
+      properties:
+        id:
+          type: integer
+        vehicleId:
+          type: integer
+        vehiclePlate:
+          type: ["string", "null"]
+        driverId:
+          type: integer
+        driverName:
+          type: ["string", "null"]
+        facilityId:
+          type: integer
+        facilityName:
+          type: ["string", "null"]
+        latitude:
+          type: number
+        longitude:
+          type: number
+        severity:
+          type: string
+          enum: [minor, moderate, major, total_loss]
+        status:
+          type: string
+          enum: [alerted, claim_initiated, under_review, resolved]
+        description:
+          type: ["string", "null"]
+        claimNumber:
+          type: ["string", "null"]
+        alertedAt:
+          type: string
+        resolvedAt:
+          type: ["string", "null"]
+
+    AccidentInput:
+      type: object
+      required: [vehicleId, driverId, facilityId, latitude, longitude, severity]
+      properties:
+        vehicleId:
+          type: integer
+        driverId:
+          type: integer
+        facilityId:
+          type: integer
+        latitude:
+          type: number
+        longitude:
+          type: number
+        severity:
+          type: string
+          enum: [minor, moderate, major, total_loss]
+        description:
+          type: ["string", "null"]
+
+    ClaimInput:
+      type: object
+      required: [claimNumber]
+      properties:
+        claimNumber:
+          type: string
+        notes:
+          type: ["string", "null"]
+
+    DashboardOverview:
+      type: object
+      required: [totalClubs, totalFacilities, totalDrivers, totalVehicles, avgPlatformRiskScore, openAccidents, certificatesExpiringSoon, premiumAtRisk]
+      properties:
+        totalClubs:
+          type: integer
+        totalFacilities:
+          type: integer
+        totalDrivers:
+          type: integer
+        totalVehicles:
+          type: integer
+        avgPlatformRiskScore:
+          type: number
+        openAccidents:
+          type: integer
+        certificatesExpiringSoon:
+          type: integer
+        premiumAtRisk:
+          type: number
+        highRiskFacilities:
+          type: integer
+        totalMilesMonitored:
+          type: number
+
+    RiskDistributionItem:
+      type: object
+      required: [tier, count, percentage]
+      properties:
+        tier:
+          type: string
+        count:
+          type: integer
+        percentage:
+          type: number
+
+    DriverRiskItem:
+      type: object
+      required: [driverId, driverName, facilityName, riskScore, riskTier, topIssue]
+      properties:
+        driverId:
+          type: integer
+        driverName:
+          type: string
+        facilityName:
+          type: string
+        riskScore:
+          type: number
+        riskTier:
+          type: string
+        topIssue:
+          type: string
+
+    ActivityPoint:
+      type: object
+      required: [date, events, miles, trips]
+      properties:
+        date:
+          type: string
+        events:
+          type: integer
+        miles:
+          type: number
+        trips:
+          type: integer

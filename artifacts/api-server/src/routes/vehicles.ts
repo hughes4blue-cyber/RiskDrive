@@ -1,0 +1,81 @@
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { vehiclesTable, facilitiesTable, driversTable, telematicsEventsTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+
+const router = Router();
+
+router.get("/vehicles", async (req, res) => {
+  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
+  let rows;
+  if (facilityId) {
+    rows = await db.select({
+      vehicle: vehiclesTable,
+      facilityName: facilitiesTable.name,
+      driverFirst: driversTable.firstName,
+      driverLast: driversTable.lastName,
+    }).from(vehiclesTable)
+      .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
+      .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id))
+      .where(eq(vehiclesTable.facilityId, facilityId));
+  } else {
+    rows = await db.select({
+      vehicle: vehiclesTable,
+      facilityName: facilitiesTable.name,
+      driverFirst: driversTable.firstName,
+      driverLast: driversTable.lastName,
+    }).from(vehiclesTable)
+      .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
+      .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id));
+  }
+
+  res.json(rows.map(({ vehicle: v, facilityName, driverFirst, driverLast }) => ({
+    id: v.id, facilityId: v.facilityId, facilityName, make: v.make, model: v.model,
+    year: v.year, licensePlate: v.licensePlate, vin: v.vin, type: v.type,
+    status: v.status, riskScore: v.riskScore, riskTier: v.riskTier,
+    totalMiles: v.totalMiles, assignedDriverId: v.assignedDriverId,
+    assignedDriverName: driverFirst ? `${driverFirst} ${driverLast}` : null,
+    telematicsDeviceId: v.telematicsDeviceId,
+    createdAt: v.createdAt?.toISOString() ?? new Date().toISOString(),
+  })));
+});
+
+router.get("/vehicles/:vehicleId", async (req, res) => {
+  const vehicleId = parseInt(req.params.vehicleId);
+  const [row] = await db.select({
+    vehicle: vehiclesTable,
+    facilityName: facilitiesTable.name,
+    driverFirst: driversTable.firstName,
+    driverLast: driversTable.lastName,
+  }).from(vehiclesTable)
+    .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
+    .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id))
+    .where(eq(vehiclesTable.id, vehicleId));
+
+  if (!row) return res.status(404).json({ error: "Vehicle not found" });
+  const { vehicle: v, facilityName, driverFirst, driverLast } = row;
+  res.json({
+    id: v.id, facilityId: v.facilityId, facilityName, make: v.make, model: v.model,
+    year: v.year, licensePlate: v.licensePlate, vin: v.vin, type: v.type,
+    status: v.status, riskScore: v.riskScore, riskTier: v.riskTier,
+    totalMiles: v.totalMiles, assignedDriverId: v.assignedDriverId,
+    assignedDriverName: driverFirst ? `${driverFirst} ${driverLast}` : null,
+    telematicsDeviceId: v.telematicsDeviceId,
+    createdAt: v.createdAt?.toISOString() ?? new Date().toISOString(),
+  });
+});
+
+router.get("/vehicles/:vehicleId/telematics", async (req, res) => {
+  const vehicleId = parseInt(req.params.vehicleId);
+  const events = await db.select().from(telematicsEventsTable)
+    .where(eq(telematicsEventsTable.vehicleId, vehicleId));
+  res.json(events.map(e => ({
+    id: e.id, vehicleId: e.vehicleId, driverId: e.driverId,
+    eventType: e.eventType, severity: e.severity,
+    latitude: e.latitude, longitude: e.longitude,
+    speed: e.speed, notes: e.notes,
+    timestamp: e.timestamp?.toISOString() ?? new Date().toISOString(),
+  })));
+});
+
+export default router;
