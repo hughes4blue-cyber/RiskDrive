@@ -1,8 +1,33 @@
 import { Link } from "wouter";
-import { ArrowLeft, Users, TrendingUp, TrendingDown, Minus, CheckCircle, ShieldCheck, ShieldAlert, ClipboardList } from "lucide-react";
+import { ArrowLeft, Users, TrendingUp, TrendingDown, Minus, CheckCircle, ShieldCheck, ShieldAlert, ClipboardList, BookOpen, Clock, Award, PlayCircle } from "lucide-react";
 import { useGetDriver, useGetDriverBehavior, useGetDriverRiskScore, useGetDriverSuggestions } from "@workspace/api-client-react";
+import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RiskBadge, StatCard } from "@/components/Layout";
+
+interface TrainingAssignment {
+  id: number;
+  moduleTitle: string | null;
+  moduleCategory: string | null;
+  moduleDurationMinutes: number | null;
+  status: string;
+  score: number | null;
+  assignedAt: string;
+  completedAt: string | null;
+}
+
+const TRAINING_STATUS: Record<string, { label: string; className: string; icon: React.ElementType }> = {
+  assigned: { label: "Assigned", className: "bg-blue-100 text-blue-800 border-blue-200", icon: BookOpen },
+  in_progress: { label: "In Progress", className: "bg-amber-100 text-amber-800 border-amber-200", icon: PlayCircle },
+  completed: { label: "Completed", className: "bg-emerald-100 text-emerald-800 border-emerald-200", icon: CheckCircle },
+};
+
+const CATEGORY_COLORS: Record<string, string> = {
+  Safety: "bg-red-50 text-red-700 border-red-200",
+  Compliance: "bg-purple-50 text-purple-700 border-purple-200",
+  Efficiency: "bg-blue-50 text-blue-700 border-blue-200",
+  Operations: "bg-slate-50 text-slate-700 border-slate-200",
+};
 
 function TrendIcon({ trend }: { trend?: string }) {
   if (trend === "improving") return <div className="flex items-center gap-1 text-emerald-600 text-xs font-medium"><TrendingDown className="w-3.5 h-3.5" /> Improving</div>;
@@ -34,6 +59,12 @@ export default function DriverDetail({ params }: { params: { driverId: string } 
   const { data: behavior, isLoading: bLoading } = useGetDriverBehavior(driverId, { query: { enabled: !!driverId, queryKey: ["getDriverBehavior", driverId] } });
   const { data: riskScore } = useGetDriverRiskScore(driverId, { query: { enabled: !!driverId, queryKey: ["getDriverRiskScore", driverId] } });
   const { data: suggestions, isLoading: sugLoading } = useGetDriverSuggestions(driverId, { query: { enabled: !!driverId, queryKey: ["getDriverSuggestions", driverId] } });
+  const [training, setTraining] = useState<TrainingAssignment[] | null>(null);
+
+  useEffect(() => {
+    if (!driverId) return;
+    fetch(`/api/training/driver/${driverId}`).then(r => r.json()).then(setTraining).catch(() => {});
+  }, [driverId]);
 
   return (
     <div>
@@ -193,6 +224,62 @@ export default function DriverDetail({ params }: { params: { driverId: string } 
                 </div>
               ))}
           </div>
+        </div>
+
+        {/* Training Assignments */}
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-sm font-semibold flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-primary" /> Assigned Training Modules
+            </div>
+            <Link href="/training" className="text-xs text-primary hover:underline">View all training →</Link>
+          </div>
+          {training === null ? (
+            <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-14 rounded-lg" />)}</div>
+          ) : training.length === 0 ? (
+            <div className="bg-card border border-dashed border-border rounded-lg p-6 text-center text-sm text-muted-foreground">
+              No training modules assigned yet
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {training.map(t => {
+                const cfg = TRAINING_STATUS[t.status] ?? TRAINING_STATUS.assigned;
+                const Icon = cfg.icon;
+                return (
+                  <div key={t.id} className="bg-card border border-border rounded-lg px-4 py-3 flex items-center gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">{t.moduleTitle}</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        {t.moduleCategory && (
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold border ${CATEGORY_COLORS[t.moduleCategory] ?? "bg-gray-50 text-gray-700"}`}>
+                            {t.moduleCategory}
+                          </span>
+                        )}
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5" /> {t.moduleDurationMinutes} min
+                        </span>
+                      </div>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border flex-shrink-0 ${cfg.className}`}>
+                      <Icon className="w-3 h-3" /> {cfg.label}
+                    </span>
+                    {t.score !== null && (
+                      <div className="flex items-center gap-1 text-xs flex-shrink-0">
+                        <Award className="w-3.5 h-3.5 text-amber-500" />
+                        <span className="font-semibold">{Math.round(t.score)}</span>
+                        <span className="text-muted-foreground">/100</span>
+                      </div>
+                    )}
+                    <div className="text-[10px] text-muted-foreground flex-shrink-0">
+                      {t.completedAt
+                        ? `Completed ${new Date(t.completedAt).toLocaleDateString()}`
+                        : `Assigned ${new Date(t.assignedAt).toLocaleDateString()}`}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>

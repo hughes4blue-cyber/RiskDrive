@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield
+  LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield, BookOpen, FileText
 } from "lucide-react";
 
 const navSections = [
@@ -29,6 +29,13 @@ const navSections = [
     items: [
       { icon: AlertTriangle, label: "Accidents", href: "/accidents" },
       { icon: FileCheck, label: "Certificates", href: "/certificates" },
+    ],
+  },
+  {
+    label: "Underwriting",
+    items: [
+      { icon: FileText, label: "Policies", href: "/policies" },
+      { icon: BookOpen, label: "Training", href: "/training" },
     ],
   },
 ];

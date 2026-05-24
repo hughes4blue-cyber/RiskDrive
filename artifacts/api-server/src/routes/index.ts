@@ -8,6 +8,8 @@ import riskRouter from "./risk";
 import certificatesRouter from "./certificates";
 import accidentsRouter from "./accidents";
 import dashboardRouter from "./dashboard";
+import trainingRouter from "./training";
+import policiesRouter from "./policies";
 
 const router: IRouter = Router();
 
@@ -20,5 +22,7 @@ router.use(riskRouter);
 router.use(certificatesRouter);
 router.use(accidentsRouter);
 router.use(dashboardRouter);
+router.use(trainingRouter);
+router.use(policiesRouter);
 
 export default router;

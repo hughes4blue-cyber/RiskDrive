@@ -14,6 +14,8 @@ import Vehicles from "@/pages/Vehicles";
 import VehicleDetail from "@/pages/VehicleDetail";
 import Accidents from "@/pages/Accidents";
 import Certificates from "@/pages/Certificates";
+import Training from "@/pages/Training";
+import Policies from "@/pages/Policies";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -40,6 +42,8 @@ function Router() {
         <Route path="/vehicles/:vehicleId" component={VehicleDetail} />
         <Route path="/accidents" component={Accidents} />
         <Route path="/certificates" component={Certificates} />
+        <Route path="/policies" component={Policies} />
+        <Route path="/training" component={Training} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

@@ -5,3 +5,5 @@ export * from "./vehicles";
 export * from "./telematics";
 export * from "./certificates";
 export * from "./accidents";
+export * from "./training";
+export * from "./policies";
