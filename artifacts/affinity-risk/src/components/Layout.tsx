@@ -100,12 +100,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="px-4 md:px-6 h-14 flex items-center gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 mr-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}>
-              <Shield className="w-3.5 h-3.5 text-white" />
-            </div>
-            <div className="leading-tight">
+            <img
+              src="/brand/affinity-risk-logo.png"
+              alt="Affinity Risk"
+              className="h-9 w-auto"
+              style={{ filter: "brightness(0) invert(1)", objectFit: "contain" }}
+            />
+            <div className="leading-tight hidden sm:block">
               <span className="text-white font-bold text-sm tracking-tight">RiskDrive</span>
-              <span className="text-slate-400 text-[10px] ml-1.5 hidden sm:inline">by Affinity Risk</span>
+              <span className="text-slate-400 text-[10px] ml-1.5">by Affinity Risk</span>
             </div>
           </Link>
 
@@ -121,7 +124,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <Link
               href="/finn"
               className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white" }}
+              style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)", color: "white" }}
             >
               <Bot className="w-3.5 h-3.5" />
               Ask Finn
@@ -228,40 +231,40 @@ function FinnWidget() {
         onClick={() => setOpen(o => !o)}
         aria-label="Open Finn AI"
         className="fixed bottom-5 right-5 z-50 w-12 h-12 rounded-full shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
-        style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)", border: "2px solid rgba(255,255,255,0.25)" }}
+        style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)", border: "2px solid rgba(255,255,255,0.25)" }}
       >
         {open ? <X className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
       </button>
 
       {open && (
         <div className="fixed bottom-20 right-5 z-50 flex flex-col bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden" style={{ width: 320, height: 420 }}>
-          <div className="flex items-center gap-2.5 px-4 py-3 flex-shrink-0" style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}>
+          <div className="flex items-center gap-2.5 px-4 py-3 flex-shrink-0" style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)" }}>
             <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><Bot className="w-3.5 h-3.5 text-white" /></div>
             <div>
               <div className="text-white font-bold text-sm">Finn</div>
-              <div className="text-amber-100 text-[10px]">RiskDrive AI Guide</div>
+              <div className="text-orange-100 text-[10px]">RiskDrive AI Guide</div>
             </div>
-            <div className="ml-auto flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-green-300" /><span className="text-amber-100 text-[10px]">Online</span></div>
+            <div className="ml-auto flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-green-300" /><span className="text-orange-100 text-[10px]">Online</span></div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-slate-50">
             {msgs.map((m, i) => (
               <div key={i} className={`flex gap-2 ${m.r === "user" ? "flex-row-reverse" : ""}`}>
-                {m.r === "finn" && <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><Bot className="w-3 h-3 text-amber-600" /></div>}
-                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${m.r === "finn" ? "bg-white border border-slate-200 text-slate-700 rounded-tl-sm" : "bg-teal-600 text-white rounded-tr-sm"}`}>{m.t}</div>
+                {m.r === "finn" && <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0"><Bot className="w-3 h-3 text-orange-600" /></div>}
+                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${m.r === "finn" ? "bg-white border border-slate-200 text-slate-700 rounded-tl-sm" : "text-white rounded-tr-sm"}`} style={m.r === "user" ? { background: "linear-gradient(135deg,#E97132,#C85A1F)" } : {}}>{m.t}</div>
               </div>
             ))}
           </div>
 
           <div className="px-3 py-1.5 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto flex-shrink-0">
             {["WC Quote", "My Score", "1099 Tips"].map(p => (
-              <button key={p} onClick={() => setInput(p)} className="flex-shrink-0 text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors">{p}</button>
+              <button key={p} onClick={() => setInput(p)} className="flex-shrink-0 text-[10px] px-2 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200 hover:bg-orange-100 transition-colors">{p}</button>
             ))}
           </div>
 
           <div className="px-3 py-2.5 bg-white border-t border-slate-100 flex gap-2 flex-shrink-0">
-            <input className="flex-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 outline-none bg-slate-50 focus:border-amber-400" placeholder="Ask Finn..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} />
-            <button onClick={send} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#F59E0B" }}>
+            <input className="flex-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 outline-none bg-slate-50 focus:border-orange-400" placeholder="Ask Finn..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} />
+            <button onClick={send} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#E97132" }}>
               <Send className="w-3 h-3 text-white" />
             </button>
           </div>

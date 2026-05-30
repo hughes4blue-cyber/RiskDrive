@@ -31,7 +31,7 @@ export default function Home() {
   const rawScore = overview ? parseFloat(String(overview.avgPlatformRiskScore)) : null;
   const score = rawScore !== null && !isNaN(rawScore) ? Math.round(rawScore) : null;
   const scoreTier = score === null ? null : score >= 70 ? "preferred" : score >= 55 ? "standard" : "limited";
-  const scoreColor = scoreTier === "preferred" ? "#10B981" : scoreTier === "standard" ? "#F59E0B" : "#EF4444";
+  const scoreColor = scoreTier === "preferred" ? "#10B981" : scoreTier === "standard" ? "#E97132" : "#EF4444";
 
   return (
     <div className="min-h-full">
@@ -46,14 +46,14 @@ export default function Home() {
 
             {/* Left — headline */}
             <div className="flex-1 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-semibold">
                 <Zap className="w-3 h-3" />
                 Telematics-Based Insurance Intelligence
               </div>
 
               <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
                 Workers Comp<br />
-                <span style={{ color: "#F59E0B" }}>Built on Real Data.</span>
+                <span style={{ color: "#E97132" }}>Built on Real Data.</span>
               </h1>
 
               <p className="text-slate-300 text-lg leading-relaxed max-w-xl">
@@ -66,7 +66,7 @@ export default function Home() {
                 <Link
                   href="/wc-quote"
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
-                  style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}
+                  style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)" }}
                 >
                   <HardHat className="w-4 h-4" />
                   Start My WC Quote
@@ -127,7 +127,7 @@ export default function Home() {
                     { label: "Safety Events", pct: 40, color: "#10B981" },
                     { label: "Compliance", pct: 30, color: "#3B82F6" },
                     { label: "Telematics", pct: 20, color: "#8B5CF6" },
-                    { label: "Training", pct: 10, color: "#F59E0B" },
+                    { label: "Training", pct: 10, color: "#E97132" },
                   ].map(f => (
                     <div key={f.label} className="flex items-center gap-2">
                       <div className="text-[10px] text-slate-300 w-24">{f.label}</div>
@@ -139,7 +139,7 @@ export default function Home() {
                   ))}
                 </div>
 
-                <Link href="/fleet-score" className="flex items-center justify-center gap-1.5 text-xs text-amber-400 hover:text-amber-300 transition-colors font-medium">
+                <Link href="/fleet-score" className="flex items-center justify-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 transition-colors font-medium">
                   Full score breakdown <ChevronRight className="w-3 h-3" />
                 </Link>
               </div>
@@ -216,7 +216,7 @@ export default function Home() {
               <Link
                 href="/wc-quote"
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white mt-1 shadow-md hover:shadow-lg transition-all hover:scale-105"
-                style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}
+                style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)" }}
               >
                 <HardHat className="w-4 h-4" />
                 Start WC Application
@@ -248,15 +248,15 @@ export default function Home() {
         {/* Finn quick-chat panel */}
         <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-200 bg-white flex flex-col">
           <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2.5"
-            style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}>
+            style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)" }}>
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
               <Bot className="w-4 h-4 text-white" />
             </div>
             <div>
               <div className="text-white font-bold text-sm">Ask Finn</div>
-              <div className="text-amber-100 text-[10px]">RiskDrive AI Guide</div>
+              <div className="text-orange-100 text-[10px]">RiskDrive AI Guide</div>
             </div>
-            <Link href="/finn" className="ml-auto text-[10px] text-amber-100 hover:text-white flex items-center gap-0.5">
+            <Link href="/finn" className="ml-auto text-[10px] text-orange-100 hover:text-white flex items-center gap-0.5">
               Full chat <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
@@ -303,7 +303,7 @@ export default function Home() {
           <div className="divide-y divide-slate-100">
             {[
               { color: "bg-red-500", label: "Open FNOL", value: overview?.openAccidents ?? "—", desc: "claims pending TPA action", href: "/claims", urgent: true },
-              { color: "bg-amber-500", label: "COIs Expiring", value: overview?.certificatesExpiringSoon ?? "—", desc: "certificates need renewal within 30 days", href: "/certificates", urgent: false },
+              { color: "bg-orange-500", label: "COIs Expiring", value: overview?.certificatesExpiringSoon ?? "—", desc: "certificates need renewal within 30 days", href: "/certificates", urgent: false },
               { color: "bg-blue-500", label: "Miles Monitored", value: overview ? `${(overview.totalMilesMonitored / 1000).toFixed(0)}K` : "—", desc: "real-time telematics across network", href: "/fleet-score", urgent: false },
             ].map(item => (
               <Link key={item.label} href={item.href} className="flex items-center gap-4 px-6 py-3.5 hover:bg-slate-50 transition-colors group">
@@ -362,9 +362,9 @@ function FinnInline() {
       <div className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-slate-50">
         {msgs.map((m, i) => (
           <div key={i} className={`flex gap-2 ${m.r === "user" ? "flex-row-reverse" : ""}`}>
-            {m.r === "finn" && <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5"><Bot className="w-3 h-3 text-amber-600" /></div>}
+            {m.r === "finn" && <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0 mt-0.5"><Bot className="w-3 h-3 text-orange-600" /></div>}
             <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${m.r === "finn" ? "bg-white border border-slate-200 text-slate-700 rounded-tl-sm" : "text-white rounded-tr-sm"}`}
-              style={m.r === "user" ? { background: "linear-gradient(135deg,#0F2940,#0D3D56)" } : {}}>
+              style={m.r === "user" ? { background: "linear-gradient(135deg,#E97132,#C85A1F)" } : {}}>
               {m.t}
             </div>
           </div>
@@ -372,13 +372,13 @@ function FinnInline() {
       </div>
       <div className="px-3 py-2.5 bg-white border-t border-slate-100 flex gap-2">
         <input
-          className="flex-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 outline-none bg-slate-50 focus:border-amber-400"
+          className="flex-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 outline-none bg-slate-50 focus:border-orange-400"
           placeholder="Ask Finn..."
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === "Enter" && send()}
         />
-        <button onClick={send} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors hover:opacity-90" style={{ background: "#F59E0B" }}>
+        <button onClick={send} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors hover:opacity-90" style={{ background: "#E97132" }}>
           <svg className="w-3 h-3 text-white fill-white" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
         </button>
       </div>
