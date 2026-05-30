@@ -37,19 +37,32 @@ export async function seedDemoDataIfEmpty() {
     if (settleCount === 0) {
       logger.info("Seeding settlement_records");
       await db.insert(settlementRecordsTable).values([
-        { facilityId: 1, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "48200", premiumDeductionPct: "12.5", premiumDeductionAmount: "6025", netSettlement: "42175", deductionReason: "Quarterly premium installment — Commercial Auto Liability via Travelers", status: "paid", notes: "On-time payment. No disputes." },
-        { facilityId: 2, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "31500", premiumDeductionPct: "10.0", premiumDeductionAmount: "3150", netSettlement: "28350", deductionReason: "Quarterly premium — Canal Insurance. Rate reduced from prior quarter due to improved fleet score.", status: "paid", notes: "Fleet score improvement drove 1.8% rate reduction." },
-        { facilityId: 3, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "22800", premiumDeductionPct: "14.2", premiumDeductionAmount: "3238", netSettlement: "19562", deductionReason: "Monthly premium — elevated rate due to open claim CLM-2026-0031", status: "pending", notes: "Rate will be re-evaluated once CLM-2026-0031 resolves." },
-        { facilityId: 4, periodStart: new Date("2026-03-01"), periodEnd: new Date("2026-03-31"), grossSettlement: "19400", premiumDeductionPct: "11.8", premiumDeductionAmount: "2289", netSettlement: "17111", deductionReason: "Quarterly premium — Protective Insurance", status: "paid", notes: "Disputed deduction resolved in Alliant review." },
-        { facilityId: 5, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "41000", premiumDeductionPct: "9.5", premiumDeductionAmount: "3895", netSettlement: "37105", deductionReason: "Monthly premium — rate improved following exoneration on CLM-2026-0019", status: "paid", notes: "FleetLytics exoneration outcome directly reduced renewal rate by 2.3%." },
-        { facilityId: 6, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "67300", premiumDeductionPct: "8.0", premiumDeductionAmount: "5384", netSettlement: "61916", deductionReason: "Quarterly premium — preferred rate, fleet score 82/100", status: "paid", notes: "Lowest rate in AAA network. High fleet score driving carrier competition." },
-        { facilityId: 7, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "14200", premiumDeductionPct: "18.0", premiumDeductionAmount: "2556", netSettlement: "11644", deductionReason: "Monthly premium — new hauler surcharge; onboarding incomplete", status: "pending", notes: "Surcharge removed once onboarding checklist is complete." },
-        { facilityId: 8, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "38900", premiumDeductionPct: "11.0", premiumDeductionAmount: "4279", netSettlement: "34621", deductionReason: "Monthly premium — National Interstate policy", status: "paid", notes: "" },
-        { facilityId: 9, periodStart: new Date("2026-04-01"), periodEnd: new Date("2026-04-30"), grossSettlement: "29700", premiumDeductionPct: "9.0", premiumDeductionAmount: "2673", netSettlement: "27027", deductionReason: "Quarterly premium — Great West Casualty; telematics adoption discount applied", status: "paid", notes: "Telematics adoption discount reduced premium 1.5% vs prior year." },
+        { facilityId: 1, periodMonth: "2026-04", grossSettlement: 48200, insurancePremiumDeduction: 6025, netPayout: 42175, status: "paid", paidAt: new Date("2026-05-05") },
+        { facilityId: 2, periodMonth: "2026-04", grossSettlement: 31500, insurancePremiumDeduction: 3150, netPayout: 28350, status: "paid", paidAt: new Date("2026-05-05") },
+        { facilityId: 3, periodMonth: "2026-04", grossSettlement: 22800, insurancePremiumDeduction: 3238, netPayout: 19562, status: "pending" },
+        { facilityId: 4, periodMonth: "2026-03", grossSettlement: 19400, insurancePremiumDeduction: 2289, netPayout: 17111, status: "paid", paidAt: new Date("2026-04-05") },
+        { facilityId: 5, periodMonth: "2026-04", grossSettlement: 41000, insurancePremiumDeduction: 3895, netPayout: 37105, status: "paid", paidAt: new Date("2026-05-05") },
+        { facilityId: 6, periodMonth: "2026-04", grossSettlement: 67300, insurancePremiumDeduction: 5384, netPayout: 61916, status: "paid", paidAt: new Date("2026-05-05") },
+        { facilityId: 7, periodMonth: "2026-04", grossSettlement: 14200, insurancePremiumDeduction: 2556, netPayout: 11644, status: "pending" },
+        { facilityId: 8, periodMonth: "2026-04", grossSettlement: 38900, insurancePremiumDeduction: 4279, netPayout: 34621, status: "paid", paidAt: new Date("2026-05-05") },
+        { facilityId: 9, periodMonth: "2026-04", grossSettlement: 29700, insurancePremiumDeduction: 2673, netPayout: 27027, status: "paid", paidAt: new Date("2026-05-05") },
       ]);
     }
 
-    if (claimsCount === 0) {
+    // Also reseed if existing claims use old status values (open/under_review)
+    // instead of the current pipeline statuses (fnol_received/assigned/etc.)
+    const hasNewFormatClaims = claimsCount > 0
+      ? await db.select({ n: sql<number>`count(*)::int` })
+          .from(claimsTable)
+          .where(sql`status IN ('fnol_received','assigned','under_investigation','adjudication')`)
+          .then(r => r[0]!.n > 0)
+      : false;
+
+    if (claimsCount === 0 || !hasNewFormatClaims) {
+      if (claimsCount > 0) {
+        logger.info("Claims have stale status values — truncating and reseeding");
+        await db.execute(sql`TRUNCATE claims RESTART IDENTITY CASCADE`);
+      }
       logger.info("Seeding claims");
       await seedClaims();
     }
