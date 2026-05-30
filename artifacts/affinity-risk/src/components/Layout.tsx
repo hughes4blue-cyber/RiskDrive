@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield, BookOpen, FileText
+  LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield, BookOpen, FileText,
+  Scale, DollarSign, ClipboardCheck, Trophy, MessageSquareWarning
 } from "lucide-react";
 
 const navSections = [
@@ -15,6 +16,7 @@ const navSections = [
     items: [
       { icon: Building2, label: "Clubs", href: "/clubs" },
       { icon: Truck, label: "Facilities", href: "/facilities" },
+      { icon: ClipboardCheck, label: "Onboarding", href: "/onboarding" },
     ],
   },
   {
@@ -22,12 +24,15 @@ const navSections = [
     items: [
       { icon: Users, label: "Drivers", href: "/drivers" },
       { icon: Car, label: "Vehicles", href: "/vehicles" },
+      { icon: Trophy, label: "Leaderboard", href: "/leaderboard" },
+      { icon: MessageSquareWarning, label: "Driver Feedback", href: "/driver-feedback" },
     ],
   },
   {
     label: "Risk & Claims",
     items: [
       { icon: AlertTriangle, label: "Accidents", href: "/accidents" },
+      { icon: Scale, label: "Claims TPA", href: "/claims" },
       { icon: FileCheck, label: "Certificates", href: "/certificates" },
     ],
   },
@@ -35,6 +40,7 @@ const navSections = [
     label: "Underwriting",
     items: [
       { icon: FileText, label: "Policies", href: "/policies" },
+      { icon: DollarSign, label: "Settlement", href: "/settlement" },
       { icon: BookOpen, label: "Training", href: "/training" },
     ],
   },

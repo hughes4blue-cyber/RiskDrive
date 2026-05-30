@@ -7,3 +7,6 @@ export * from "./certificates";
 export * from "./accidents";
 export * from "./training";
 export * from "./policies";
+export * from "./claims";
+export * from "./settlements";
+export * from "./onboarding";

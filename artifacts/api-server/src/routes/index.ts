@@ -10,6 +10,9 @@ import accidentsRouter from "./accidents";
 import dashboardRouter from "./dashboard";
 import trainingRouter from "./training";
 import policiesRouter from "./policies";
+import claimsRouter from "./claims";
+import settlementsRouter from "./settlements";
+import onboardingRouter from "./onboarding";
 
 const router: IRouter = Router();
 
@@ -24,5 +27,8 @@ router.use(accidentsRouter);
 router.use(dashboardRouter);
 router.use(trainingRouter);
 router.use(policiesRouter);
+router.use(claimsRouter);
+router.use(settlementsRouter);
+router.use(onboardingRouter);
 
 export default router;

@@ -16,6 +16,11 @@ import Accidents from "@/pages/Accidents";
 import Certificates from "@/pages/Certificates";
 import Training from "@/pages/Training";
 import Policies from "@/pages/Policies";
+import ClaimsDashboard from "@/pages/ClaimsDashboard";
+import Settlement from "@/pages/Settlement";
+import Onboarding from "@/pages/Onboarding";
+import Leaderboard from "@/pages/Leaderboard";
+import DriverFeedback from "@/pages/DriverFeedback";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -44,6 +49,11 @@ function Router() {
         <Route path="/certificates" component={Certificates} />
         <Route path="/policies" component={Policies} />
         <Route path="/training" component={Training} />
+        <Route path="/claims" component={ClaimsDashboard} />
+        <Route path="/settlement" component={Settlement} />
+        <Route path="/onboarding" component={Onboarding} />
+        <Route path="/leaderboard" component={Leaderboard} />
+        <Route path="/driver-feedback" component={DriverFeedback} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

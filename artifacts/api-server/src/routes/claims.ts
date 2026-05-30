@@ -1,0 +1,94 @@
+import { Router } from "express";
+import { db } from "@workspace/db";
+import { claimsTable, facilitiesTable, clubsTable, driversTable, accidentsTable } from "@workspace/db";
+import { eq, desc } from "drizzle-orm";
+
+const router = Router();
+
+const CLAIM_STEPS = ["fnol_received", "assigned", "under_investigation", "adjudication", "closed"];
+
+async function formatClaim(c: typeof claimsTable.$inferSelect) {
+  const [facility] = await db.select({ f: facilitiesTable, clubName: clubsTable.name })
+    .from(facilitiesTable).leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id))
+    .where(eq(facilitiesTable.id, c.facilityId));
+  const [driver] = c.driverId ? await db.select().from(driversTable).where(eq(driversTable.id, c.driverId)) : [null];
+  return {
+    id: c.id,
+    accidentId: c.accidentId,
+    facilityId: c.facilityId,
+    facilityName: facility?.f.name ?? null,
+    clubName: facility?.clubName ?? null,
+    driverId: c.driverId,
+    driverName: driver ? `${driver.firstName} ${driver.lastName}` : null,
+    claimNumber: c.claimNumber,
+    tpaName: c.tpaName,
+    status: c.status,
+    severity: c.severity,
+    description: c.description,
+    exonerationStatus: c.exonerationStatus,
+    settlementAmount: c.settlementAmount,
+    reserveAmount: c.reserveAmount,
+    litigationNotes: c.litigationNotes,
+    isLitigated: c.isLitigated,
+    adjusterName: c.adjusterName,
+    fnolReceivedAt: c.fnolReceivedAt.toISOString(),
+    assignedAt: c.assignedAt?.toISOString() ?? null,
+    investigationStartedAt: c.investigationStartedAt?.toISOString() ?? null,
+    adjudicatedAt: c.adjudicatedAt?.toISOString() ?? null,
+    closedAt: c.closedAt?.toISOString() ?? null,
+    createdAt: c.createdAt.toISOString(),
+  };
+}
+
+router.get("/claims", async (req, res) => {
+  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
+  const status = req.query.status as string | undefined;
+  let rows = await db.select().from(claimsTable).orderBy(desc(claimsTable.fnolReceivedAt));
+  if (facilityId) rows = rows.filter(c => c.facilityId === facilityId);
+  if (status) rows = rows.filter(c => c.status === status);
+  const result = await Promise.all(rows.map(formatClaim));
+  res.json(result);
+});
+
+router.get("/claims/summary", async (_req, res) => {
+  const all = await db.select().from(claimsTable);
+  const total = all.length;
+  const open = all.filter(c => c.status !== "closed").length;
+  const litigated = all.filter(c => c.isLitigated).length;
+  const exonerated = all.filter(c => c.exonerationStatus === "exonerated").length;
+  const totalReserve = all.reduce((s, c) => s + (c.reserveAmount ?? 0), 0);
+  const totalSettled = all.filter(c => c.settlementAmount).reduce((s, c) => s + (c.settlementAmount ?? 0), 0);
+  const exonerationRate = total > 0 ? Math.round((exonerated / total) * 100) : 0;
+  res.json({ total, open, litigated, exonerated, exonerationRate, totalReserve, totalSettled });
+});
+
+router.get("/claims/:claimId", async (req, res) => {
+  const id = parseInt(req.params.claimId);
+  const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
+  if (!c) return res.status(404).json({ error: "Claim not found" });
+  res.json(await formatClaim(c));
+});
+
+router.patch("/claims/:claimId/advance", async (req, res) => {
+  const id = parseInt(req.params.claimId);
+  const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
+  if (!c) return res.status(404).json({ error: "Claim not found" });
+  const idx = CLAIM_STEPS.indexOf(c.status);
+  if (idx === -1 || idx === CLAIM_STEPS.length - 1) return res.status(400).json({ error: "Cannot advance" });
+  const next = CLAIM_STEPS[idx + 1];
+  const now = new Date();
+  const update: Record<string, unknown> = { status: next, updatedAt: now };
+  if (next === "assigned") update.assignedAt = now;
+  if (next === "under_investigation") update.investigationStartedAt = now;
+  if (next === "adjudication") update.adjudicatedAt = now;
+  if (next === "closed") { update.closedAt = now; update.exonerationStatus = req.body.exonerationStatus ?? "pending"; }
+  if (req.body.adjusterName) update.adjusterName = req.body.adjusterName;
+  if (req.body.reserveAmount !== undefined) update.reserveAmount = req.body.reserveAmount;
+  if (req.body.settlementAmount !== undefined) update.settlementAmount = req.body.settlementAmount;
+  if (req.body.litigationNotes) { update.litigationNotes = req.body.litigationNotes; update.isLitigated = true; }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [updated] = await db.update(claimsTable).set(update as any).where(eq(claimsTable.id, id)).returning();
+  res.json(await formatClaim(updated));
+});
+
+export default router;
