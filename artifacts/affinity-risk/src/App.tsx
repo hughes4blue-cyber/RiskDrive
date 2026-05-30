@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Layout } from "@/components/Layout";
+import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import Clubs from "@/pages/Clubs";
 import ClubDetail from "@/pages/ClubDetail";
@@ -39,7 +40,8 @@ function Router() {
   return (
     <Layout>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/" component={Home} />
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/clubs" component={Clubs} />
         <Route path="/clubs/:clubId" component={ClubDetail} />
         <Route path="/facilities" component={Facilities} />

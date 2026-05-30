@@ -1,25 +1,27 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import {
-  LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield, BookOpen, FileText,
-  Scale, DollarSign, ClipboardCheck, Trophy, MessageSquareWarning, BarChart3, Bot, HardHat
+  Shield, Bot, ChevronDown, Menu, X, BarChart3, Users, Car, Trophy,
+  MessageSquareWarning, AlertTriangle, Scale, FileCheck, HardHat,
+  FileText, DollarSign, BookOpen, Building2, Truck, ClipboardCheck,
+  LayoutDashboard, Send
 } from "lucide-react";
 
-const navSections = [
+const NAV = [
   {
     label: "Overview",
     items: [
-      { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+      { icon: LayoutDashboard, label: "Portal Home", href: "/" },
       { icon: BarChart3, label: "RiskDrive Score", href: "/fleet-score" },
-      { icon: Bot, label: "Finn AI Assistant", href: "/finn" },
     ],
   },
   {
-    label: "AAA Network",
+    label: "Insurance",
     items: [
-      { icon: Building2, label: "Clubs", href: "/clubs" },
-      { icon: Truck, label: "Tow Operators", href: "/facilities" },
-      { icon: ClipboardCheck, label: "Onboarding", href: "/onboarding" },
+      { icon: HardHat, label: "Workers Comp Quote", href: "/wc-quote" },
+      { icon: FileText, label: "Liability Placement", href: "/policies" },
+      { icon: DollarSign, label: "Settlement", href: "/settlement" },
+      { icon: BookOpen, label: "Safety Training", href: "/training" },
     ],
   },
   {
@@ -40,218 +42,227 @@ const navSections = [
     ],
   },
   {
-    label: "Insurance",
+    label: "AAA Network",
     items: [
-      { icon: HardHat, label: "Workers Comp Quote", href: "/wc-quote" },
-      { icon: FileText, label: "Liability Placement", href: "/policies" },
-      { icon: DollarSign, label: "Settlement", href: "/settlement" },
-      { icon: BookOpen, label: "Safety Training", href: "/training" },
+      { icon: Building2, label: "Clubs", href: "/clubs" },
+      { icon: Truck, label: "Tow Operators", href: "/facilities" },
+      { icon: ClipboardCheck, label: "Onboarding", href: "/onboarding" },
     ],
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+function NavDropdown({ section, location }: { section: typeof NAV[0]; location: string }) {
+  const [open, setOpen] = useState(false);
+  const isActive = section.items.some(i => i.href === "/" ? location === "/" : location.startsWith(i.href));
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
-      <aside className="w-60 flex-shrink-0 bg-[hsl(222,47%,10%)] border-r border-[hsl(222,47%,16%)] flex flex-col">
-        <div className="px-5 py-5 border-b border-[hsl(222,47%,16%)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-              <Shield className="w-4 h-4 text-white" />
+    <div className="relative" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
+      <button
+        className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+          isActive ? "bg-white/15 text-white" : "text-slate-300 hover:text-white hover:bg-white/10"
+        }`}
+      >
+        {section.label}
+        <ChevronDown className={`w-3 h-3 transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1.5 z-50">
+          {section.items.map(item => {
+            const active = item.href === "/" ? location === "/" : location.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-2.5 px-3.5 py-2 text-sm transition-colors ${
+                  active ? "bg-teal-50 text-teal-700 font-medium" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                }`}
+              >
+                <item.icon className="w-4 h-4 flex-shrink-0" />
+                {item.label}
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Layout({ children }: { children: React.ReactNode }) {
+  const [location] = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-50">
+      {/* Top Navigation */}
+      <header className="sticky top-0 z-40" style={{ background: "linear-gradient(135deg, #0F2940 0%, #0D3D56 100%)" }}>
+        <div className="px-4 md:px-6 h-14 flex items-center gap-4">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 mr-2">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}>
+              <Shield className="w-3.5 h-3.5 text-white" />
             </div>
-            <div>
-              <div className="text-white font-bold text-sm leading-tight">RiskDrive</div>
-              <div className="text-[hsl(215,20%,55%)] text-[10px] leading-tight">by Affinity Risk</div>
+            <div className="leading-tight">
+              <span className="text-white font-bold text-sm tracking-tight">RiskDrive</span>
+              <span className="text-slate-400 text-[10px] ml-1.5 hidden sm:inline">by Affinity Risk</span>
             </div>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-0.5 flex-1">
+            {NAV.map(section => (
+              <NavDropdown key={section.label} section={section} location={location} />
+            ))}
+          </nav>
+
+          {/* Right actions */}
+          <div className="ml-auto flex items-center gap-2">
+            <Link
+              href="/finn"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)", color: "white" }}
+            >
+              <Bot className="w-3.5 h-3.5" />
+              Ask Finn
+            </Link>
+            <Link
+              href="/wc-quote"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors border border-white/20"
+            >
+              <HardHat className="w-3.5 h-3.5" />
+              WC Quote
+            </Link>
+            {/* Mobile menu toggle */}
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="md:hidden text-white p-1.5 rounded-lg hover:bg-white/10">
+              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto py-4 px-3">
-          {navSections.map((section) => (
-            <div key={section.label} className="mb-5">
-              <div className="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[hsl(215,20%,45%)]">
-                {section.label}
-              </div>
-              {section.items.map((item) => {
-                const isActive = item.href === "/" ? location === "/" : location.startsWith(item.href);
-                const isFinn = item.href === "/finn";
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    data-testid={`nav-${item.label.toLowerCase().replace(/\s+/g, "-")}`}
-                    className={`flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium mb-0.5 transition-colors ${
-                      isActive
-                        ? "bg-[hsl(221,83%,53%)] text-white"
-                        : isFinn
-                        ? "text-amber-400 hover:bg-[hsl(222,47%,16%)] hover:text-amber-300"
-                        : "text-[hsl(215,20%,65%)] hover:bg-[hsl(222,47%,16%)] hover:text-white"
-                    }`}
-                  >
-                    <item.icon className="w-4 h-4 flex-shrink-0" />
+        {/* Mobile menu */}
+        {mobileOpen && (
+          <div className="md:hidden border-t border-white/10 bg-slate-900 py-3 px-4 space-y-4">
+            {NAV.map(section => (
+              <div key={section.label}>
+                <div className="text-[10px] font-semibold uppercase tracking-widest text-slate-500 mb-1.5">{section.label}</div>
+                {section.items.map(item => (
+                  <Link key={item.href} href={item.href}
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2.5 px-2 py-1.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/10">
+                    <item.icon className="w-4 h-4" />
                     {item.label}
-                    {isFinn && !isActive && (
-                      <span className="ml-auto text-[9px] bg-amber-500 text-white px-1.5 py-0.5 rounded-full font-bold">AI</span>
-                    )}
                   </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </header>
 
-        <div className="px-5 py-3 border-t border-[hsl(222,47%,16%)]">
-          <div className="text-[hsl(215,20%,50%)] text-[10px] font-semibold">Affinity Risk Solutions</div>
-          <div className="text-[hsl(215,20%,40%)] text-[10px]">Powered by Affinity RiskDrive™</div>
-          <div className="text-[hsl(215,20%,35%)] text-[10px]">Telematics-Based Risk Intelligence</div>
+      {/* Breadcrumb strip */}
+      <div className="bg-white border-b border-slate-200 px-6 py-2 flex items-center gap-2 text-xs text-slate-500">
+        <Link href="/" className="hover:text-teal-600 transition-colors font-medium text-slate-600">RiskDrive</Link>
+        {location !== "/" && (
+          <>
+            <span className="text-slate-300">/</span>
+            <span className="text-slate-700 capitalize">{location.replace(/^\//, "").replace(/-/g, " ") || "Home"}</span>
+          </>
+        )}
+        <div className="ml-auto flex items-center gap-1.5">
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="text-slate-400">All systems operational</span>
         </div>
-      </aside>
+      </div>
 
-      <main className="flex-1 overflow-y-auto">
+      {/* Page content */}
+      <main className="flex-1">
         {children}
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+        <div className="text-xs text-slate-400">
+          © 2026 Affinity Risk Solutions · Powered by RiskDrive™ · Telematics-Based Insurance Intelligence
+        </div>
+        <div className="flex items-center gap-4 text-xs text-slate-400">
+          <Link href="/finn" className="hover:text-teal-600">Ask Finn</Link>
+          <Link href="/wc-quote" className="hover:text-teal-600">WC Quote</Link>
+          <Link href="/fleet-score" className="hover:text-teal-600">RiskDrive Score</Link>
+        </div>
+      </footer>
 
       <FinnWidget />
     </div>
   );
 }
 
-const FINN_RESPONSES: { keywords: string[]; reply: string }[] = [
-  {
-    keywords: ["workers comp", "wc", "work comp", "workers compensation"],
-    reply: "Workers Comp for tow operators is rated on actual payroll by class code — not on units. Your RiskDrive data (hours driven, incident rates, coaching outcomes) gives underwriters a much more accurate risk picture. Head to the Workers Comp Quote page and I'll help pre-fill it from your existing data. Operators with clean telematics typically save 8–22% vs. standard market rates.",
-  },
-  {
-    keywords: ["score", "riskdrive", "risk drive", "fleet score"],
-    reply: "Your RiskDrive Score is built from four weighted factors: Safety Events (40%), Compliance (30%), Telematics Behavior (20%), and Training Completion (10%). A score above 70 unlocks preferred carrier markets and lower premium tiers. Want specific tips for improving your score fastest?",
-  },
-  {
-    keywords: ["1099", "contractor", "corporate veil", "independent", "w2"],
-    reply: "Great question on compliance. Affinity RiskDrive maintains separate scorecards per independent contractor — each operator is scored individually. This data is used for insurance rating purposes only. We never use telematics data to control work schedules, assign jobs, or direct hours — doing so would risk reclassification. Your AAA club can monitor safety without crossing the W2 line.",
-  },
-  {
-    keywords: ["carrier", "market", "quote", "premium", "liability"],
-    reply: "Affinity Risk works with multiple admitted and specialty carriers for commercial auto liability, general liability, and workers comp. Your RiskDrive score determines which markets we can access and at what tier. Higher scores = more carriers competing for your business = lower premiums. Want me to walk through your current placement options?",
-  },
-  {
-    keywords: ["claim", "accident", "incident", "exonerat"],
-    reply: "When an incident occurs, Affinity RiskDrive immediately secures telematics data, dashcam clips, and GPS records. This evidence package is critical — it's the difference between paying a $74K claim and a $0 exoneration. Your TPA receives a structured evidence packet within minutes of the FNOL. Want to see how the claims pipeline works?",
-  },
-  {
-    keywords: ["onboard", "new operator", "new facility", "checklist"],
-    reply: "Onboarding a new tow operator involves 10 steps: COI verification, contract signing, tax status, articles of incorporation, driver license requirements, vehicle inspection, telematics agreement, device installation, background checks, and facility rep assignment. Finn can walk you through any step. Which one needs attention?",
-  },
-  {
-    keywords: ["training", "safety", "module", "coach"],
-    reply: "Safety Training in Affinity RiskDrive assigns modules based on each driver's actual event history — phone use events trigger distracted driving modules, speeding events trigger speed management training. Completion rates factor into the Compliance component of your RiskDrive Score. Want me to identify which drivers need immediate module assignment?",
-  },
+/* ── Finn corner widget ──────────────────────────────────────────── */
+
+const FINN_KB: { kw: string[]; reply: string }[] = [
+  { kw: ["workers comp","wc","work comp"], reply: "WC for tow operators is rated on actual payroll — not guesses. Your RiskDrive telematics data gives underwriters a real picture. Operators with clean data save 8–22% vs. standard market. Head to WC Quote and I'll help pre-fill it." },
+  { kw: ["score","riskdrive"], reply: "Your RiskDrive Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred carrier markets and lower tier premiums. Want tips to improve fastest?" },
+  { kw: ["1099","contractor","w2"], reply: "Affinity RiskDrive scores each contractor independently. Data is used for insurance rating only — never to direct work schedules or assign jobs, which would risk W2 reclassification." },
+  { kw: ["claim","accident","exonerat"], reply: "On any incident, RiskDrive immediately secures telematics data and dashcam clips. This evidence packet is the difference between a $74K claim and a $0 exoneration. Our network exoneration rate is 25%." },
 ];
-
-const FINN_DEFAULT = "Great question! I'm here to help tow operators and AAA clubs with insurance, compliance, and their RiskDrive score. Some things I can help with: Workers Comp quotes, understanding your RiskDrive Score, 1099 contractor compliance, claims support, and carrier placement. What would you like to explore?";
-
-function getFinnReply(input: string): string {
-  const lower = input.toLowerCase();
-  for (const { keywords, reply } of FINN_RESPONSES) {
-    if (keywords.some(k => lower.includes(k))) return reply;
-  }
-  return FINN_DEFAULT;
-}
+const FINN_DEFAULT = "I help tow operators and AAA clubs with WC quotes, RiskDrive scores, 1099 compliance, and claims. What do you need?";
+function finnReply(t: string) { const l = t.toLowerCase(); return FINN_KB.find(e => e.kw.some(k => l.includes(k)))?.reply ?? FINN_DEFAULT; }
 
 function FinnWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<{ role: "finn" | "user"; text: string }[]>([
-    { role: "finn", text: "Hi! I'm Finn, your Affinity Risk AI assistant. I help tow operators and AAA clubs with insurance, RiskDrive scores, and 1099 compliance. What can I help you with today?" },
+  const [msgs, setMsgs] = useState<{ r: "finn"|"user"; t: string }[]>([
+    { r: "finn", t: "Hi! I'm Finn — your Affinity Risk AI guide. Ask me about WC quotes, your RiskDrive score, or 1099 compliance." }
   ]);
 
   function send() {
-    const text = input.trim();
-    if (!text) return;
-    setMessages(prev => [...prev, { role: "user", text }]);
+    const t = input.trim(); if (!t) return;
+    setMsgs(p => [...p, { r: "user", t }]);
     setInput("");
-    setTimeout(() => {
-      setMessages(prev => [...prev, { role: "finn", text: getFinnReply(text) }]);
-    }, 500);
+    setTimeout(() => setMsgs(p => [...p, { r: "finn", t: finnReply(t) }]), 500);
   }
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(o => !o)}
-        className="fixed bottom-5 right-5 z-50 shadow-xl flex items-center justify-center transition-all hover:scale-105"
-        style={{ width: 52, height: 52, borderRadius: "50%", background: "linear-gradient(135deg, #f59e0b, #d97706)", border: "2px solid rgba(255,255,255,0.2)" }}
-        title="Chat with Finn"
-        aria-label="Open Finn AI assistant"
+        onClick={() => setOpen(o => !o)}
+        aria-label="Open Finn AI"
+        className="fixed bottom-5 right-5 z-50 w-12 h-12 rounded-full shadow-xl flex items-center justify-center hover:scale-105 transition-transform"
+        style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)", border: "2px solid rgba(255,255,255,0.25)" }}
       >
-        {isOpen
-          ? <span style={{ color: "white", fontSize: 22, lineHeight: 1, fontWeight: 700 }}>×</span>
-          : <Bot style={{ color: "white", width: 22, height: 22 }} />
-        }
+        {open ? <X className="w-5 h-5 text-white" /> : <Bot className="w-5 h-5 text-white" />}
       </button>
 
-      {isOpen && (
-        <div className="fixed bottom-20 right-5 z-50 flex flex-col overflow-hidden bg-white rounded-2xl border border-gray-200 shadow-2xl" style={{ width: 320, height: 430 }}>
-          <div className="flex items-center gap-2.5 px-4 py-3 flex-shrink-0" style={{ background: "linear-gradient(135deg, #f59e0b, #d97706)" }}>
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
-              <Bot className="w-4 h-4 text-white" />
-            </div>
+      {open && (
+        <div className="fixed bottom-20 right-5 z-50 flex flex-col bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden" style={{ width: 320, height: 420 }}>
+          <div className="flex items-center gap-2.5 px-4 py-3 flex-shrink-0" style={{ background: "linear-gradient(135deg,#F59E0B,#D97706)" }}>
+            <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center"><Bot className="w-3.5 h-3.5 text-white" /></div>
             <div>
               <div className="text-white font-bold text-sm">Finn</div>
-              <div className="text-amber-100 text-[10px]">Affinity Risk AI Assistant</div>
+              <div className="text-amber-100 text-[10px]">RiskDrive AI Guide</div>
             </div>
-            <div className="ml-auto flex items-center gap-1">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-300" style={{ animation: "pulse 2s infinite" }} />
-              <span className="text-amber-100 text-[10px]">Online</span>
-            </div>
+            <div className="ml-auto flex items-center gap-1"><div className="w-1.5 h-1.5 rounded-full bg-green-300" /><span className="text-amber-100 text-[10px]">Online</span></div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-gray-50">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex gap-2 ${m.role === "user" ? "flex-row-reverse" : ""}`}>
-                {m.role === "finn" && (
-                  <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                    <Bot className="w-3 h-3 text-amber-600" />
-                  </div>
-                )}
-                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${
-                  m.role === "finn"
-                    ? "bg-white border border-gray-200 text-gray-700 rounded-tl-sm"
-                    : "bg-blue-600 text-white rounded-tr-sm"
-                }`}>
-                  {m.text}
-                </div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5 bg-slate-50">
+            {msgs.map((m, i) => (
+              <div key={i} className={`flex gap-2 ${m.r === "user" ? "flex-row-reverse" : ""}`}>
+                {m.r === "finn" && <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0"><Bot className="w-3 h-3 text-amber-600" /></div>}
+                <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-xs leading-relaxed ${m.r === "finn" ? "bg-white border border-slate-200 text-slate-700 rounded-tl-sm" : "bg-teal-600 text-white rounded-tr-sm"}`}>{m.t}</div>
               </div>
             ))}
           </div>
 
-          <div className="px-3 py-1.5 bg-white border-t border-gray-100 flex gap-1.5 overflow-x-auto flex-shrink-0">
-            {["WC Quote", "My Score", "1099 Tips", "Claims Help"].map(p => (
-              <button
-                key={p}
-                onClick={() => setInput(p)}
-                className="flex-shrink-0 text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors"
-              >
-                {p}
-              </button>
+          <div className="px-3 py-1.5 bg-white border-t border-slate-100 flex gap-1.5 overflow-x-auto flex-shrink-0">
+            {["WC Quote", "My Score", "1099 Tips"].map(p => (
+              <button key={p} onClick={() => setInput(p)} className="flex-shrink-0 text-[10px] px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition-colors">{p}</button>
             ))}
           </div>
 
-          <div className="px-3 py-2.5 bg-white border-t border-gray-100 flex gap-2 flex-shrink-0">
-            <input
-              className="flex-1 text-xs px-3 py-1.5 rounded-full border border-gray-200 outline-none bg-gray-50 focus:border-amber-400"
-              placeholder="Ask Finn anything..."
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => e.key === "Enter" && send()}
-            />
-            <button
-              onClick={send}
-              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-colors hover:opacity-90"
-              style={{ background: "#f59e0b" }}
-            >
-              <span style={{ color: "white", fontSize: 12, fontWeight: 700 }}>↑</span>
+          <div className="px-3 py-2.5 bg-white border-t border-slate-100 flex gap-2 flex-shrink-0">
+            <input className="flex-1 text-xs px-3 py-1.5 rounded-full border border-slate-200 outline-none bg-slate-50 focus:border-amber-400" placeholder="Ask Finn..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} />
+            <button onClick={send} className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#F59E0B" }}>
+              <Send className="w-3 h-3 text-white" />
             </button>
           </div>
         </div>
@@ -260,31 +271,17 @@ function FinnWidget() {
   );
 }
 
+/* ── Shared primitives ───────────────────────────────────────────── */
+
 export function PageHeader({ title, subtitle, children }: { title: string; subtitle?: string; children?: React.ReactNode }) {
   return (
-    <div className="border-b border-border bg-card px-6 py-4 flex items-center justify-between">
+    <div className="bg-white border-b border-slate-200 px-6 py-5 flex items-start justify-between">
       <div>
-        <h1 className="text-lg font-semibold text-foreground">{title}</h1>
-        {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-xl font-bold text-slate-900">{title}</h1>
+        {subtitle && <p className="text-sm text-slate-500 mt-0.5 max-w-2xl">{subtitle}</p>}
       </div>
-      {children && <div className="flex items-center gap-2">{children}</div>}
+      {children && <div className="flex items-center gap-2 ml-4 flex-shrink-0">{children}</div>}
     </div>
-  );
-}
-
-export function RiskBadge({ score, tier }: { score?: number; tier?: string }) {
-  const t = tier ?? riskTier(score ?? 0);
-  const config = {
-    low: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    moderate: "bg-amber-100 text-amber-800 border-amber-200",
-    high: "bg-orange-100 text-orange-800 border-orange-200",
-    critical: "bg-red-100 text-red-800 border-red-200",
-  }[t] ?? "bg-gray-100 text-gray-800 border-gray-200";
-  return (
-    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${config}`}>
-      {score !== undefined && <span>{Math.round(score)}</span>}
-      <span className="capitalize">{t}</span>
-    </span>
   );
 }
 
@@ -295,41 +292,34 @@ export function riskTier(score: number): string {
   return "critical";
 }
 
+export function RiskBadge({ score, tier }: { score?: number; tier?: string }) {
+  const t = tier ?? riskTier(score ?? 0);
+  const cfg = { low: "bg-emerald-100 text-emerald-700 border-emerald-200", moderate: "bg-amber-100 text-amber-700 border-amber-200", high: "bg-orange-100 text-orange-700 border-orange-200", critical: "bg-red-100 text-red-700 border-red-200" }[t] ?? "bg-slate-100 text-slate-700 border-slate-200";
+  return <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold border ${cfg}`}>{score !== undefined && <span>{Math.round(score)}</span>}<span className="capitalize">{t}</span></span>;
+}
+
 export function RiskBar({ score }: { score: number }) {
   const color = score < 30 ? "bg-emerald-500" : score < 55 ? "bg-amber-500" : score < 75 ? "bg-orange-500" : "bg-red-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(score, 100)}%` }} />
-      </div>
-      <span className="text-xs font-mono text-muted-foreground w-7 text-right">{Math.round(score)}</span>
+      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(score, 100)}%` }} /></div>
+      <span className="text-xs font-mono text-slate-400 w-7 text-right">{Math.round(score)}</span>
     </div>
   );
 }
 
 export function CertBadge({ status }: { status: string }) {
-  const config: Record<string, string> = {
-    current: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    expiring_soon: "bg-amber-100 text-amber-800 border-amber-200",
-    expired: "bg-red-100 text-red-800 border-red-200",
-    missing: "bg-gray-100 text-gray-800 border-gray-200",
-  };
-  const labels: Record<string, string> = {
-    current: "Current", expiring_soon: "Expiring Soon", expired: "Expired", missing: "Missing",
-  };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${config[status] ?? config.missing}`}>
-      {labels[status] ?? status}
-    </span>
-  );
+  const cfg: Record<string, string> = { current: "bg-emerald-100 text-emerald-700 border-emerald-200", expiring_soon: "bg-amber-100 text-amber-700 border-amber-200", expired: "bg-red-100 text-red-700 border-red-200", missing: "bg-slate-100 text-slate-700 border-slate-200" };
+  const lbl: Record<string, string> = { current: "Current", expiring_soon: "Expiring Soon", expired: "Expired", missing: "Missing" };
+  return <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${cfg[status] ?? cfg.missing}`}>{lbl[status] ?? status}</span>;
 }
 
 export function StatCard({ label, value, sub, color }: { label: string; value: string | number; sub?: string; color?: string }) {
   return (
-    <div className="bg-card border border-border rounded-lg p-4">
-      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{label}</div>
-      <div className={`text-2xl font-bold ${color ?? "text-foreground"}`}>{value}</div>
-      {sub && <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>}
+    <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
+      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">{label}</div>
+      <div className={`text-2xl font-bold ${color ?? "text-slate-900"}`}>{value}</div>
+      {sub && <div className="text-xs text-slate-400 mt-0.5">{sub}</div>}
     </div>
   );
 }
