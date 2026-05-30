@@ -58,8 +58,8 @@ export default function Home() {
 
               <p className="text-slate-300 text-lg leading-relaxed max-w-xl">
                 AmTrust has created a Workers Comp product specifically for towing contractors
-                and their 1099 operators — rated on actual payroll by class code, with
-                <strong className="text-white"> 6+ competing carriers</strong> and 24-hour quote turnaround.
+                and their 1099 operators — rated on actual payroll by class code, through
+                <strong className="text-white"> AmTrust exclusively</strong>, with 24-hour quote turnaround.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-1">
@@ -85,7 +85,7 @@ export default function Home() {
               <div className="flex flex-wrap gap-4 pt-2">
                 {[
                   { label: "Avg. Savings", value: "14%" },
-                  { label: "Carrier Markets", value: "6+" },
+                  { label: "Carrier", value: "AmTrust" },
                   { label: "Quote Turnaround", value: "24h" },
                   { label: "1099 Inclusive", value: "✓" },
                 ].map(b => (
@@ -114,7 +114,7 @@ export default function Home() {
                   {[
                     "Payroll-based class code rating",
                     "1099 towing contractors fully included",
-                    "6+ competing carrier markets",
+                    "AmTrust dedicated towing program",
                     "Experience mod (e-mod) factored in",
                     "Loss run analysis included",
                   ].map(item => (
@@ -208,7 +208,7 @@ export default function Home() {
                   { icon: CheckCircle2, text: "Rated on payroll by class code — AmTrust program", color: "text-emerald-500" },
                   { icon: CheckCircle2, text: "WC data preloads into your telematics platform via API", color: "text-emerald-500" },
                   { icon: CheckCircle2, text: "Covers 1099 contractors, owner-operators & W-2 staff", color: "text-emerald-500" },
-                  { icon: CheckCircle2, text: "Multi-market submission — best terms, 24h turnaround", color: "text-emerald-500" },
+                  { icon: CheckCircle2, text: "AmTrust dedicated program — competitive towing-specific rates", color: "text-emerald-500" },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-start gap-2">
                     <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${color}`} />
