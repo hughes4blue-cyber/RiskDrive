@@ -57,14 +57,14 @@ export default function Dashboard() {
 
   return (
     <div>
-      <PageHeader title="FleetLytics Platform Dashboard" subtitle="Alliant FleetLytics — transforming AAA towing network telematics and claims data into better coverage, lower premiums, and measurable TCOR reduction" />
+      <PageHeader title="Affinity RiskDrive™ Dashboard" subtitle="Affinity Risk Solutions — real telematics, real data, right-sized premiums for AAA towing networks" />
       <div className="p-6 space-y-6">
 
-        {/* FleetLytics Program Value Banner */}
+        {/* RiskDrive Value Banner */}
         <div className="bg-gradient-to-r from-primary/5 via-primary/8 to-primary/5 border border-primary/20 rounded-xl px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Carrier Markets Accessible", value: "8", sub: "Competing for AAA network business", color: "text-primary" },
-            { label: "Est. Premium Savings vs. Benchmark", value: "14%", sub: "Based on fleet telematics scores", color: "text-emerald-600" },
+            { label: "Est. Premium Savings vs. Benchmark", value: "14%", sub: "Based on actual telematics scores", color: "text-emerald-600" },
             { label: "Claim Exoneration Rate", value: "25%", sub: "Powered by dashcam & telematics data", color: "text-primary" },
             { label: "TCOR Trend", value: "↓ Improving", sub: "90-day rolling fleet performance", color: "text-emerald-600" },
           ].map(s => (

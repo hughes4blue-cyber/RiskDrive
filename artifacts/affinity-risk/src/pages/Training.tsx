@@ -99,7 +99,7 @@ export default function Training() {
     <div>
       <PageHeader
         title="Training & Driver Development"
-        subtitle="Targeted training assignments driven by telematics behavior data — FleetLytics Training Vendor integration"
+        subtitle="Targeted training assignments driven by telematics behavior data — Affinity RiskDrive integration"
       />
       <div className="p-6 space-y-6">
         {/* Stats */}

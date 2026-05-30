@@ -182,7 +182,7 @@ export default function FleetScore() {
     <div>
       <PageHeader
         title="Fleet Score & Insurance Impact"
-        subtitle="FleetLytics composite scores per facility — translating telematics data into carrier accessibility, premium right-sizing, and TCOR reduction"
+        subtitle="Affinity RiskDrive™ composite scores per facility — translating telematics data into carrier accessibility, premium right-sizing, and TCOR reduction"
       />
       <div className="p-6 space-y-6">
 
@@ -191,12 +191,12 @@ export default function FleetScore() {
           <div className="flex items-start gap-4">
             <Shield className="w-8 h-8 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <div className="text-sm font-bold text-primary mb-1">How FleetLytics Translates to Insurance Outcomes</div>
+              <div className="text-sm font-bold text-primary mb-1">How Affinity RiskDrive™ Translates to Insurance Outcomes</div>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">
-                FleetLytics acts as an independent analytics layer between your fleet technology and insurance markets.
-                The composite Fleet Score summarizes safety, compliance, telematics adoption, and training performance into a
+                Affinity RiskDrive acts as an independent analytics layer between your fleet technology and insurance markets.
+                The composite RiskDrive Score summarizes safety, compliance, telematics adoption, and training performance into a
                 single signal underwriters can trust — expanding carrier accessibility, right-sizing premiums, and reducing
-                your total cost of risk (TCOR). Alliant, as your specialty broker, takes this score to market
+                your total cost of risk (TCOR). Affinity Risk, as your specialty broker, takes this score to market
                 on your behalf to access more carriers and negotiate better terms.
               </p>
               <div className="mt-3 flex flex-wrap gap-4 text-xs">
@@ -236,14 +236,14 @@ export default function FleetScore() {
         <div className="bg-slate-50 border border-border rounded-lg p-4">
           <div className="flex items-center gap-2 mb-2">
             <Info className="w-4 h-4 text-muted-foreground" />
-            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Alliant's Carrier Market Panel for AAA Towing Network</div>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Affinity Risk Carrier Market Panel for AAA Towing Network</div>
           </div>
           <div className="flex flex-wrap gap-2">
             {CARRIERS.map(c => (
               <span key={c} className="inline-flex items-center px-2.5 py-1 bg-white border border-border rounded-md text-xs font-medium text-foreground">{c}</span>
             ))}
           </div>
-          <div className="text-[10px] text-muted-foreground mt-2">Higher fleet scores unlock access to more carriers, increasing competition and reducing premiums. Alliant submits fleet data to multiple markets simultaneously.</div>
+          <div className="text-[10px] text-muted-foreground mt-2">Higher fleet scores unlock access to more carriers, increasing competition and reducing premiums. Affinity Risk submits fleet data to multiple markets simultaneously.</div>
         </div>
 
         {/* Filters */}

@@ -41,7 +41,7 @@ interface Policy {
 const STEPS = [
   { key: "draft", label: "Draft", icon: FileText },
   { key: "submitted", label: "Submitted to Markets", icon: ChevronRight },
-  { key: "prequalified", label: "FleetLytics Assessed", icon: CheckCircle2 },
+  { key: "prequalified", label: "RiskDrive Assessed", icon: CheckCircle2 },
   { key: "quoted", label: "Quotes Received", icon: Clock },
   { key: "bound", label: "Policy Bound", icon: CheckCircle2 },
 ];
@@ -69,7 +69,7 @@ function SubmissionStepper({ status }: { status: string }) {
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   draft: { label: "Draft", className: "bg-gray-100 text-gray-700 border-gray-200" },
   submitted: { label: "Submitted to Markets", className: "bg-blue-100 text-blue-700 border-blue-200" },
-  prequalified: { label: "FleetLytics Assessed", className: "bg-purple-100 text-purple-700 border-purple-200" },
+  prequalified: { label: "RiskDrive Assessed", className: "bg-purple-100 text-purple-700 border-purple-200" },
   quoted: { label: "Quotes Received", className: "bg-amber-100 text-amber-700 border-amber-200" },
   bound: { label: "Policy Bound", className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
   active: { label: "Active", className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
@@ -125,7 +125,7 @@ export default function Policies() {
     <div>
       <PageHeader
         title="Insurance Placement Pipeline"
-        subtitle="Alliant acts as your specialty broker — FleetLytics fleet scores are submitted to multiple carrier markets to secure better coverage at lower premiums"
+        subtitle="Affinity Risk acts as your specialty broker — RiskDrive scores are submitted to multiple carrier markets to secure better coverage at lower premiums"
       >
         <div className="flex bg-muted rounded-md p-0.5">
           <button onClick={() => setTab("pipeline")} className={`px-3 py-1 rounded text-sm font-medium transition-colors ${tab === "pipeline" ? "bg-white shadow-sm text-foreground" : "text-muted-foreground"}`}>
@@ -140,10 +140,10 @@ export default function Policies() {
       <div className="p-6 space-y-6">
         {tab === "pipeline" ? (
           <>
-            {/* Alliant broker role explainer */}
+            {/* Affinity Risk broker role explainer */}
             <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-xs text-blue-800 flex items-start gap-3">
               <Shield className="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <span><strong>Alliant Insurance Services acts as your specialty broker — not the insurer.</strong> FleetLytics fleet scores and telematics data are submitted to our panel of 8+ carrier markets simultaneously, creating competition for your business and broadening insurance availability. The pipeline below tracks each submission from draft through final policy binding.</span>
+              <span><strong>Affinity Risk acts as your specialty broker — not the insurer.</strong> RiskDrive scores and telematics data are submitted to our panel of 8+ carrier markets simultaneously, creating competition for your business and broadening insurance availability. The pipeline below tracks each submission from draft through final policy binding.</span>
             </div>
 
             {/* Stats */}
