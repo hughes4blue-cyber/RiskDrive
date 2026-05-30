@@ -201,16 +201,14 @@ export default function Home() {
             {/* Left col — why RiskDrive WC */}
             <div className="space-y-4">
               <p className="text-sm text-slate-600 leading-relaxed">
-                Standard WC uses industry averages. <strong>RiskDrive WC uses your data</strong> —
-                individual driver scorecards, incident trends, and coaching outcomes — to present
-                a more accurate risk profile to underwriters.
+                AmTrust's dedicated towing contractor program — payroll and class-code rated. After binding, your WC data <strong>preloads directly into your telematics platform</strong> (Samsara, Geotab, Motive, etc.) via API, or we can provide a partner solution.
               </p>
               <div className="space-y-2.5">
                 {[
-                  { icon: CheckCircle2, text: "Rated on actual payroll by class code", color: "text-emerald-500" },
-                  { icon: CheckCircle2, text: "Telematics credit of 8–18% applied automatically", color: "text-emerald-500" },
-                  { icon: CheckCircle2, text: "1099 contractor scorecards, individually rated", color: "text-emerald-500" },
-                  { icon: CheckCircle2, text: "6+ carrier markets compete for your business", color: "text-emerald-500" },
+                  { icon: CheckCircle2, text: "Rated on payroll by class code — AmTrust program", color: "text-emerald-500" },
+                  { icon: CheckCircle2, text: "WC data preloads into your telematics platform via API", color: "text-emerald-500" },
+                  { icon: CheckCircle2, text: "Covers 1099 contractors, owner-operators & W-2 staff", color: "text-emerald-500" },
+                  { icon: CheckCircle2, text: "Multi-market submission — best terms, 24h turnaround", color: "text-emerald-500" },
                 ].map(({ icon: Icon, text, color }) => (
                   <div key={text} className="flex items-start gap-2">
                     <Icon className={`w-4 h-4 flex-shrink-0 mt-0.5 ${color}`} />
@@ -347,7 +345,7 @@ function FinnInline() {
   const [input, setInput] = useState("");
 
   const KB: { kw: string[]; t: string }[] = [
-    { kw: ["wc","workers comp","quote"], t: "Head to the WC Quote page — I'll help pre-fill it from your RiskDrive data. Operators with a score 70+ typically qualify for a 14% premium credit." },
+    { kw: ["wc","workers comp","quote"], t: "Head to the WC Quote page to start an AmTrust application. After your policy binds, your WC data preloads into your telematics platform via API — or we can set you up with a partner solution." },
     { kw: ["score","riskdrive"], t: "Your RiskDrive Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred markets." },
     { kw: ["1099","contractor"], t: "RiskDrive scores each 1099 operator individually. That data is for insurance rating only — never used to control schedules, which would risk reclassification." },
   ];
