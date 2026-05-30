@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import {
   LayoutDashboard, Building2, Truck, Users, Car, AlertTriangle, FileCheck, Shield, BookOpen, FileText,
-  Scale, DollarSign, ClipboardCheck, Trophy, MessageSquareWarning
+  Scale, DollarSign, ClipboardCheck, Trophy, MessageSquareWarning, BarChart3
 } from "lucide-react";
 
 const navSections = [
@@ -9,6 +9,7 @@ const navSections = [
     label: "Overview",
     items: [
       { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+      { icon: BarChart3, label: "Fleet Score", href: "/fleet-score" },
     ],
   },
   {

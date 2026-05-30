@@ -57,8 +57,24 @@ export default function Dashboard() {
 
   return (
     <div>
-      <PageHeader title="Platform Dashboard" subtitle="Affinity Risk Solutions — AAA Towing Network Overview" />
+      <PageHeader title="FleetLytics Platform Dashboard" subtitle="Alliant FleetLytics — transforming AAA towing network telematics and claims data into better coverage, lower premiums, and measurable TCOR reduction" />
       <div className="p-6 space-y-6">
+
+        {/* FleetLytics Program Value Banner */}
+        <div className="bg-gradient-to-r from-primary/5 via-primary/8 to-primary/5 border border-primary/20 rounded-xl px-5 py-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { label: "Carrier Markets Accessible", value: "8", sub: "Competing for AAA network business", color: "text-primary" },
+            { label: "Est. Premium Savings vs. Benchmark", value: "14%", sub: "Based on fleet telematics scores", color: "text-emerald-600" },
+            { label: "Claim Exoneration Rate", value: "25%", sub: "Powered by dashcam & telematics data", color: "text-primary" },
+            { label: "TCOR Trend", value: "↓ Improving", sub: "90-day rolling fleet performance", color: "text-emerald-600" },
+          ].map(s => (
+            <div key={s.label}>
+              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wide mb-0.5">{s.label}</div>
+              <div className={`text-lg font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-[10px] text-muted-foreground">{s.sub}</div>
+            </div>
+          ))}
+        </div>
 
         {/* KPI Row */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -67,10 +83,10 @@ export default function Dashboard() {
           ) : (
             <>
               <StatCard label="AAA Clubs" value={overview?.totalClubs ?? 0} sub="Active regions" />
-              <StatCard label="Facilities" value={overview?.totalFacilities ?? 0} sub={`${overview?.highRiskFacilities ?? 0} high risk`} />
+              <StatCard label="Tow Operators" value={overview?.totalFacilities ?? 0} sub={`${overview?.highRiskFacilities ?? 0} need intervention`} />
               <StatCard label="Drivers" value={overview?.totalDrivers ?? 0} sub="Under telematics" />
               <StatCard label="Vehicles" value={overview?.totalVehicles ?? 0} sub="Monitored fleet" />
-              <StatCard label="Avg Risk Score" value={overview?.avgPlatformRiskScore ?? 0} sub="Platform-wide" color={
+              <StatCard label="Avg Fleet Risk Score" value={overview?.avgPlatformRiskScore ?? 0} sub="Lower is better" color={
                 (overview?.avgPlatformRiskScore ?? 0) < 30 ? "text-emerald-600" :
                 (overview?.avgPlatformRiskScore ?? 0) < 55 ? "text-amber-600" :
                 (overview?.avgPlatformRiskScore ?? 0) < 75 ? "text-orange-600" : "text-red-600"
@@ -85,10 +101,10 @@ export default function Dashboard() {
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 rounded-lg" />)
           ) : (
             <>
-              <StatCard label="Open Accidents" value={overview?.openAccidents ?? 0} sub="Pending action" color="text-red-600" />
-              <StatCard label="Certs Expiring" value={overview?.certificatesExpiringSoon ?? 0} sub="Need renewal" color="text-amber-600" />
-              <StatCard label="Miles Monitored" value={(overview?.totalMilesMonitored ?? 0).toLocaleString()} sub="Fleet total" />
-              <StatCard label="Premium at Risk" value={`$${((overview?.premiumAtRisk ?? 0) / 1000).toFixed(0)}K`} sub="High/critical facilities" color="text-orange-600" />
+              <StatCard label="Open FNOL / Claims" value={overview?.openAccidents ?? 0} sub="Pending TPA action" color="text-red-600" />
+              <StatCard label="COIs Expiring" value={overview?.certificatesExpiringSoon ?? 0} sub="Need renewal" color="text-amber-600" />
+              <StatCard label="Miles Monitored" value={(overview?.totalMilesMonitored ?? 0).toLocaleString()} sub="Real-time telematics" />
+              <StatCard label="TCOR Exposure" value={`$${((overview?.premiumAtRisk ?? 0) / 1000).toFixed(0)}K`} sub="High/critical operators" color="text-orange-600" />
             </>
           )}
         </div>

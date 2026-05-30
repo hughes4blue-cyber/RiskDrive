@@ -17,6 +17,7 @@ import Certificates from "@/pages/Certificates";
 import Training from "@/pages/Training";
 import Policies from "@/pages/Policies";
 import ClaimsDashboard from "@/pages/ClaimsDashboard";
+import FleetScore from "@/pages/FleetScore";
 import Settlement from "@/pages/Settlement";
 import Onboarding from "@/pages/Onboarding";
 import Leaderboard from "@/pages/Leaderboard";
@@ -49,6 +50,7 @@ function Router() {
         <Route path="/certificates" component={Certificates} />
         <Route path="/policies" component={Policies} />
         <Route path="/training" component={Training} />
+        <Route path="/fleet-score" component={FleetScore} />
         <Route path="/claims" component={ClaimsDashboard} />
         <Route path="/settlement" component={Settlement} />
         <Route path="/onboarding" component={Onboarding} />
