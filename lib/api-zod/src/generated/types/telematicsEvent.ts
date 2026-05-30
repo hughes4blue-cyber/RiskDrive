@@ -21,4 +21,8 @@ export interface TelematicsEvent {
   timestamp: string;
   /** @nullable */
   notes?: string | null;
+  /** @nullable */
+  provider?: string | null;
+  /** @nullable */
+  externalId?: string | null;
 }

@@ -4,7 +4,7 @@ import {
   Shield, Bot, ChevronDown, Menu, X, BarChart3, Users, Car, Trophy,
   MessageSquareWarning, AlertTriangle, Scale, FileCheck, HardHat,
   FileText, DollarSign, BookOpen, Building2, Truck, ClipboardCheck,
-  LayoutDashboard, Send
+  LayoutDashboard, Send, Satellite
 } from "lucide-react";
 
 const NAV = [
@@ -29,6 +29,7 @@ const NAV = [
     items: [
       { icon: Users, label: "Drivers", href: "/drivers" },
       { icon: Car, label: "Vehicles", href: "/vehicles" },
+      { icon: Satellite, label: "Connect Telematics", href: "/connect-telematics" },
       { icon: Trophy, label: "Leaderboard", href: "/leaderboard" },
       { icon: MessageSquareWarning, label: "Driver Coaching", href: "/driver-feedback" },
     ],

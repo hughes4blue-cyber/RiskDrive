@@ -40,9 +40,14 @@ import type {
   ListCertificatesParams,
   ListDriversParams,
   ListFacilitiesParams,
+  ListTelematicsConnectionsParams,
+  ListTelematicsEventsParams,
   ListVehiclesParams,
   RiskDistributionItem,
   RiskScore,
+  SyncResult,
+  TelematicsConnection,
+  TelematicsConnectionInput,
   TelematicsEvent,
   Vehicle
 } from './api.schemas';
@@ -2298,6 +2303,462 @@ export function useGetTelematicsActivity<TData = Awaited<ReturnType<typeof getTe
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetTelematicsActivityQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListTelematicsConnectionsUrl = (params?: ListTelematicsConnectionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/telematics/connections?${stringifiedParams}` : `/api/telematics/connections`
+}
+
+/**
+ * @summary List telematics provider connections
+ */
+export const listTelematicsConnections = async (params?: ListTelematicsConnectionsParams, options?: RequestInit): Promise<TelematicsConnection[]> => {
+
+  return customFetch<TelematicsConnection[]>(getListTelematicsConnectionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListTelematicsConnectionsQueryKey = (params?: ListTelematicsConnectionsParams,) => {
+    return [
+    `/api/telematics/connections`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListTelematicsConnectionsQueryOptions = <TData = Awaited<ReturnType<typeof listTelematicsConnections>>, TError = ErrorType<unknown>>(params?: ListTelematicsConnectionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTelematicsConnections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTelematicsConnectionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTelematicsConnections>>> = ({ signal }) => listTelematicsConnections(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTelematicsConnections>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListTelematicsConnectionsQueryResult = NonNullable<Awaited<ReturnType<typeof listTelematicsConnections>>>
+export type ListTelematicsConnectionsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List telematics provider connections
+ */
+
+export function useListTelematicsConnections<TData = Awaited<ReturnType<typeof listTelematicsConnections>>, TError = ErrorType<unknown>>(
+ params?: ListTelematicsConnectionsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTelematicsConnections>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListTelematicsConnectionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateTelematicsConnectionUrl = () => {
+
+
+
+
+  return `/api/telematics/connections`
+}
+
+/**
+ * @summary Connect a telematics provider (validates credentials)
+ */
+export const createTelematicsConnection = async (telematicsConnectionInput: TelematicsConnectionInput, options?: RequestInit): Promise<TelematicsConnection> => {
+
+  return customFetch<TelematicsConnection>(getCreateTelematicsConnectionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      telematicsConnectionInput,)
+  }
+);}
+
+
+
+
+export const getCreateTelematicsConnectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTelematicsConnection>>, TError,{data: BodyType<TelematicsConnectionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTelematicsConnection>>, TError,{data: BodyType<TelematicsConnectionInput>}, TContext> => {
+
+const mutationKey = ['createTelematicsConnection'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTelematicsConnection>>, {data: BodyType<TelematicsConnectionInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTelematicsConnection(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTelematicsConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof createTelematicsConnection>>>
+    export type CreateTelematicsConnectionMutationBody = BodyType<TelematicsConnectionInput>
+    export type CreateTelematicsConnectionMutationError = ErrorType<void>
+
+    /**
+ * @summary Connect a telematics provider (validates credentials)
+ */
+export const useCreateTelematicsConnection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTelematicsConnection>>, TError,{data: BodyType<TelematicsConnectionInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTelematicsConnection>>,
+        TError,
+        {data: BodyType<TelematicsConnectionInput>},
+        TContext
+      > => {
+      return useMutation(getCreateTelematicsConnectionMutationOptions(options));
+    }
+
+export const getGetTelematicsConnectionUrl = (id: number,) => {
+
+
+
+
+  return `/api/telematics/connections/${id}`
+}
+
+/**
+ * @summary Get a telematics connection
+ */
+export const getTelematicsConnection = async (id: number, options?: RequestInit): Promise<TelematicsConnection> => {
+
+  return customFetch<TelematicsConnection>(getGetTelematicsConnectionUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTelematicsConnectionQueryKey = (id: number,) => {
+    return [
+    `/api/telematics/connections/${id}`
+    ] as const;
+    }
+
+
+export const getGetTelematicsConnectionQueryOptions = <TData = Awaited<ReturnType<typeof getTelematicsConnection>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTelematicsConnection>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTelematicsConnectionQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTelematicsConnection>>> = ({ signal }) => getTelematicsConnection(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTelematicsConnection>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTelematicsConnectionQueryResult = NonNullable<Awaited<ReturnType<typeof getTelematicsConnection>>>
+export type GetTelematicsConnectionQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a telematics connection
+ */
+
+export function useGetTelematicsConnection<TData = Awaited<ReturnType<typeof getTelematicsConnection>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTelematicsConnection>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTelematicsConnectionQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getDeleteTelematicsConnectionUrl = (id: number,) => {
+
+
+
+
+  return `/api/telematics/connections/${id}`
+}
+
+/**
+ * @summary Disconnect a telematics provider
+ */
+export const deleteTelematicsConnection = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteTelematicsConnectionUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteTelematicsConnectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTelematicsConnection>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTelematicsConnection>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteTelematicsConnection'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTelematicsConnection>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteTelematicsConnection(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTelematicsConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTelematicsConnection>>>
+
+    export type DeleteTelematicsConnectionMutationError = ErrorType<void>
+
+    /**
+ * @summary Disconnect a telematics provider
+ */
+export const useDeleteTelematicsConnection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTelematicsConnection>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTelematicsConnection>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteTelematicsConnectionMutationOptions(options));
+    }
+
+export const getSyncTelematicsConnectionUrl = (id: number,) => {
+
+
+
+
+  return `/api/telematics/connections/${id}/sync`
+}
+
+/**
+ * @summary Pull latest vehicles, drivers, and events from the provider
+ */
+export const syncTelematicsConnection = async (id: number, options?: RequestInit): Promise<SyncResult> => {
+
+  return customFetch<SyncResult>(getSyncTelematicsConnectionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getSyncTelematicsConnectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncTelematicsConnection>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof syncTelematicsConnection>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['syncTelematicsConnection'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof syncTelematicsConnection>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  syncTelematicsConnection(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SyncTelematicsConnectionMutationResult = NonNullable<Awaited<ReturnType<typeof syncTelematicsConnection>>>
+
+    export type SyncTelematicsConnectionMutationError = ErrorType<void>
+
+    /**
+ * @summary Pull latest vehicles, drivers, and events from the provider
+ */
+export const useSyncTelematicsConnection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof syncTelematicsConnection>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof syncTelematicsConnection>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getSyncTelematicsConnectionMutationOptions(options));
+    }
+
+export const getListTelematicsEventsUrl = (params?: ListTelematicsEventsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/telematics/events?${stringifiedParams}` : `/api/telematics/events`
+}
+
+/**
+ * @summary List recent telematics events (optionally by facility)
+ */
+export const listTelematicsEvents = async (params?: ListTelematicsEventsParams, options?: RequestInit): Promise<TelematicsEvent[]> => {
+
+  return customFetch<TelematicsEvent[]>(getListTelematicsEventsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListTelematicsEventsQueryKey = (params?: ListTelematicsEventsParams,) => {
+    return [
+    `/api/telematics/events`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListTelematicsEventsQueryOptions = <TData = Awaited<ReturnType<typeof listTelematicsEvents>>, TError = ErrorType<unknown>>(params?: ListTelematicsEventsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTelematicsEvents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTelematicsEventsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTelematicsEvents>>> = ({ signal }) => listTelematicsEvents(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTelematicsEvents>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListTelematicsEventsQueryResult = NonNullable<Awaited<ReturnType<typeof listTelematicsEvents>>>
+export type ListTelematicsEventsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List recent telematics events (optionally by facility)
+ */
+
+export function useListTelematicsEvents<TData = Awaited<ReturnType<typeof listTelematicsEvents>>, TError = ErrorType<unknown>>(
+ params?: ListTelematicsEventsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTelematicsEvents>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListTelematicsEventsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

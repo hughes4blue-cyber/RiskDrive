@@ -573,6 +573,132 @@ paths:
                 items:
                   $ref: "#/components/schemas/ActivityPoint"
 
+  # ─── Telematics Connections (real provider integrations) ─────────────────────
+  /telematics/connections:
+    get:
+      operationId: listTelematicsConnections
+      tags: [telematics]
+      summary: List telematics provider connections
+      parameters:
+        - name: facilityId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of connections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelematicsConnection"
+    post:
+      operationId: createTelematicsConnection
+      tags: [telematics]
+      summary: Connect a telematics provider (validates credentials)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TelematicsConnectionInput"
+      responses:
+        "201":
+          description: Connection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelematicsConnection"
+        "400":
+          description: Invalid credentials or input
+
+  /telematics/connections/{id}:
+    get:
+      operationId: getTelematicsConnection
+      tags: [telematics]
+      summary: Get a telematics connection
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Connection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TelematicsConnection"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTelematicsConnection
+      tags: [telematics]
+      summary: Disconnect a telematics provider
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Disconnected
+        "404":
+          description: Not found
+
+  /telematics/connections/{id}/sync:
+    post:
+      operationId: syncTelematicsConnection
+      tags: [telematics]
+      summary: Pull latest vehicles, drivers, and events from the provider
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncResult"
+        "400":
+          description: Sync failed
+        "404":
+          description: Not found
+
+  /telematics/events:
+    get:
+      operationId: listTelematicsEvents
+      tags: [telematics]
+      summary: List recent telematics events (optionally by facility)
+      parameters:
+        - name: facilityId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Recent events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TelematicsEvent"
+
 components:
   schemas:
     HealthStatus:
@@ -831,6 +957,76 @@ components:
         timestamp:
           type: string
         notes:
+          type: ["string", "null"]
+        provider:
+          type: ["string", "null"]
+        externalId:
+          type: ["string", "null"]
+
+    TelematicsConnection:
+      type: object
+      required: [id, facilityId, provider, status, vehicleCount, driverCount, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        facilityId:
+          type: integer
+        provider:
+          type: string
+          enum: [samsara, geotab]
+        status:
+          type: string
+          enum: [connected, error, disconnected]
+        accountLabel:
+          type: ["string", "null"]
+        externalOrgName:
+          type: ["string", "null"]
+        vehicleCount:
+          type: integer
+        driverCount:
+          type: integer
+        lastSyncAt:
+          type: ["string", "null"]
+        lastError:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    TelematicsConnectionInput:
+      type: object
+      required: [facilityId, provider]
+      properties:
+        facilityId:
+          type: integer
+        provider:
+          type: string
+          enum: [samsara, geotab]
+        accountLabel:
+          type: string
+        apiToken:
+          type: string
+        server:
+          type: string
+        database:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+
+    SyncResult:
+      type: object
+      required: [vehiclesSynced, driversSynced, eventsSynced]
+      properties:
+        vehiclesSynced:
+          type: integer
+        driversSynced:
+          type: integer
+        eventsSynced:
+          type: integer
+        orgName:
           type: ["string", "null"]
 
     RiskScore:

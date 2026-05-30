@@ -25,6 +25,7 @@ import Leaderboard from "@/pages/Leaderboard";
 import DriverFeedback from "@/pages/DriverFeedback";
 import FinnPage from "@/pages/Finn";
 import WCQuote from "@/pages/WCQuote";
+import ConnectTelematics from "@/pages/ConnectTelematics";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient({
@@ -62,6 +63,7 @@ function Router() {
         <Route path="/driver-feedback" component={DriverFeedback} />
         <Route path="/finn" component={FinnPage} />
         <Route path="/wc-quote" component={WCQuote} />
+        <Route path="/connect-telematics" component={ConnectTelematics} />
         <Route component={NotFound} />
       </Switch>
     </Layout>

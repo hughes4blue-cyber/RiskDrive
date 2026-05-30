@@ -3,6 +3,7 @@ export * from "./facilities";
 export * from "./drivers";
 export * from "./vehicles";
 export * from "./telematics";
+export * from "./telematics_connections";
 export * from "./certificates";
 export * from "./accidents";
 export * from "./training";

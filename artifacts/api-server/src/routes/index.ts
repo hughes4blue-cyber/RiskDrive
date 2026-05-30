@@ -13,6 +13,7 @@ import policiesRouter from "./policies";
 import claimsRouter from "./claims";
 import settlementsRouter from "./settlements";
 import onboardingRouter from "./onboarding";
+import telematicsRouter from "./telematics";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(policiesRouter);
 router.use(claimsRouter);
 router.use(settlementsRouter);
 router.use(onboardingRouter);
+router.use(telematicsRouter);
 
 export default router;

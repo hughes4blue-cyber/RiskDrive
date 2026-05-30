@@ -262,6 +262,73 @@ export interface TelematicsEvent {
   timestamp: string;
   /** @nullable */
   notes?: string | null;
+  /** @nullable */
+  provider?: string | null;
+  /** @nullable */
+  externalId?: string | null;
+}
+
+export type TelematicsConnectionProvider = typeof TelematicsConnectionProvider[keyof typeof TelematicsConnectionProvider];
+
+
+export const TelematicsConnectionProvider = {
+  samsara: 'samsara',
+  geotab: 'geotab',
+} as const;
+
+export type TelematicsConnectionStatus = typeof TelematicsConnectionStatus[keyof typeof TelematicsConnectionStatus];
+
+
+export const TelematicsConnectionStatus = {
+  connected: 'connected',
+  error: 'error',
+  disconnected: 'disconnected',
+} as const;
+
+export interface TelematicsConnection {
+  id: number;
+  facilityId: number;
+  provider: TelematicsConnectionProvider;
+  status: TelematicsConnectionStatus;
+  /** @nullable */
+  accountLabel?: string | null;
+  /** @nullable */
+  externalOrgName?: string | null;
+  vehicleCount: number;
+  driverCount: number;
+  /** @nullable */
+  lastSyncAt?: string | null;
+  /** @nullable */
+  lastError?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type TelematicsConnectionInputProvider = typeof TelematicsConnectionInputProvider[keyof typeof TelematicsConnectionInputProvider];
+
+
+export const TelematicsConnectionInputProvider = {
+  samsara: 'samsara',
+  geotab: 'geotab',
+} as const;
+
+export interface TelematicsConnectionInput {
+  facilityId: number;
+  provider: TelematicsConnectionInputProvider;
+  accountLabel?: string;
+  apiToken?: string;
+  server?: string;
+  database?: string;
+  username?: string;
+  password?: string;
+}
+
+export interface SyncResult {
+  vehiclesSynced: number;
+  driversSynced: number;
+  eventsSynced: number;
+  /** @nullable */
+  orgName?: string | null;
 }
 
 export type RiskScoreEntityType = typeof RiskScoreEntityType[keyof typeof RiskScoreEntityType];
@@ -505,5 +572,14 @@ facilityId?: number;
 export type ListAccidentsParams = {
 facilityId?: number;
 status?: string;
+};
+
+export type ListTelematicsConnectionsParams = {
+facilityId?: number;
+};
+
+export type ListTelematicsEventsParams = {
+facilityId?: number;
+limit?: number;
 };
 

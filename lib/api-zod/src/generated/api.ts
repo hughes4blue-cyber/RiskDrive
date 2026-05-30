@@ -301,7 +301,9 @@ export const GetVehicleTelematicsResponseItem = zod.object({
   "longitude": zod.number(),
   "speed": zod.number(),
   "timestamp": zod.string(),
-  "notes": zod.string().nullish()
+  "notes": zod.string().nullish(),
+  "provider": zod.string().nullish(),
+  "externalId": zod.string().nullish()
 })
 export const GetVehicleTelematicsResponse = zod.array(GetVehicleTelematicsResponseItem)
 
@@ -630,5 +632,115 @@ export const GetTelematicsActivityResponseItem = zod.object({
   "trips": zod.number()
 })
 export const GetTelematicsActivityResponse = zod.array(GetTelematicsActivityResponseItem)
+
+
+/**
+ * @summary List telematics provider connections
+ */
+export const ListTelematicsConnectionsQueryParams = zod.object({
+  "facilityId": zod.coerce.number().optional()
+})
+
+export const ListTelematicsConnectionsResponseItem = zod.object({
+  "id": zod.number(),
+  "facilityId": zod.number(),
+  "provider": zod.enum(['samsara', 'geotab']),
+  "status": zod.enum(['connected', 'error', 'disconnected']),
+  "accountLabel": zod.string().nullish(),
+  "externalOrgName": zod.string().nullish(),
+  "vehicleCount": zod.number(),
+  "driverCount": zod.number(),
+  "lastSyncAt": zod.string().nullish(),
+  "lastError": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListTelematicsConnectionsResponse = zod.array(ListTelematicsConnectionsResponseItem)
+
+
+/**
+ * @summary Connect a telematics provider (validates credentials)
+ */
+export const CreateTelematicsConnectionBody = zod.object({
+  "facilityId": zod.number(),
+  "provider": zod.enum(['samsara', 'geotab']),
+  "accountLabel": zod.string().optional(),
+  "apiToken": zod.string().optional(),
+  "server": zod.string().optional(),
+  "database": zod.string().optional(),
+  "username": zod.string().optional(),
+  "password": zod.string().optional()
+})
+
+
+/**
+ * @summary Get a telematics connection
+ */
+export const GetTelematicsConnectionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetTelematicsConnectionResponse = zod.object({
+  "id": zod.number(),
+  "facilityId": zod.number(),
+  "provider": zod.enum(['samsara', 'geotab']),
+  "status": zod.enum(['connected', 'error', 'disconnected']),
+  "accountLabel": zod.string().nullish(),
+  "externalOrgName": zod.string().nullish(),
+  "vehicleCount": zod.number(),
+  "driverCount": zod.number(),
+  "lastSyncAt": zod.string().nullish(),
+  "lastError": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Disconnect a telematics provider
+ */
+export const DeleteTelematicsConnectionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Pull latest vehicles, drivers, and events from the provider
+ */
+export const SyncTelematicsConnectionParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const SyncTelematicsConnectionResponse = zod.object({
+  "vehiclesSynced": zod.number(),
+  "driversSynced": zod.number(),
+  "eventsSynced": zod.number(),
+  "orgName": zod.string().nullish()
+})
+
+
+/**
+ * @summary List recent telematics events (optionally by facility)
+ */
+export const ListTelematicsEventsQueryParams = zod.object({
+  "facilityId": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const ListTelematicsEventsResponseItem = zod.object({
+  "id": zod.number(),
+  "vehicleId": zod.number(),
+  "driverId": zod.number().nullable(),
+  "eventType": zod.enum(['hard_braking', 'harsh_acceleration', 'speeding', 'phone_usage', 'sharp_turn', 'fatigue_detected', 'accident']),
+  "severity": zod.enum(['low', 'medium', 'high', 'critical']),
+  "latitude": zod.number(),
+  "longitude": zod.number(),
+  "speed": zod.number(),
+  "timestamp": zod.string(),
+  "notes": zod.string().nullish(),
+  "provider": zod.string().nullish(),
+  "externalId": zod.string().nullish()
+})
+export const ListTelematicsEventsResponse = zod.array(ListTelematicsEventsResponseItem)
 
 
