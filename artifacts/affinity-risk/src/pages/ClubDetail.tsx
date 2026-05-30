@@ -99,7 +99,7 @@ export default function ClubDetail({ params }: { params: { clubId: string } }) {
                     <td className="px-4 py-3"><RiskBadge score={f.riskScore} tier={f.riskTier} /></td>
                     <td className="px-4 py-3 font-mono">{f.totalDrivers}</td>
                     <td className="px-4 py-3 font-mono">{f.totalVehicles}</td>
-                    <td className="px-4 py-3"><CertBadge status={f.certStatus} /></td>
+                    <td className="px-4 py-3"><CertBadge status={f.certStatus ?? "unknown"} /></td>
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={`/facilities/${f.id}`}

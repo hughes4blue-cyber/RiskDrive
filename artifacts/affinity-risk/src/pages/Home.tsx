@@ -47,19 +47,19 @@ export default function Home() {
             {/* Left — headline */}
             <div className="flex-1 space-y-5">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-semibold">
-                <Zap className="w-3 h-3" />
-                Telematics-Based Insurance Intelligence
+                <HardHat className="w-3 h-3" />
+                AmTrust Program · Towing Contractor Edition
               </div>
 
               <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight">
                 Workers Comp<br />
-                <span style={{ color: "#E97132" }}>Built on Real Data.</span>
+                <span style={{ color: "#E97132" }}>Built for Tow Operators.</span>
               </h1>
 
               <p className="text-slate-300 text-lg leading-relaxed max-w-xl">
-                Traditional WC is rated on guesses. RiskDrive rates on your actual telematics —
-                driving behavior, incident rates, coaching outcomes. Tow operators with clean
-                data save <strong className="text-white">8–22%</strong> vs. standard market rates.
+                AmTrust has created a Workers Comp product specifically for towing contractors
+                and their 1099 operators — rated on actual payroll by class code, with
+                <strong className="text-white"> 6+ competing carriers</strong> and 24-hour quote turnaround.
               </p>
 
               <div className="flex flex-wrap gap-3 pt-1">
@@ -85,9 +85,9 @@ export default function Home() {
               <div className="flex flex-wrap gap-4 pt-2">
                 {[
                   { label: "Avg. Savings", value: "14%" },
-                  { label: "Carrier Markets", value: "8+" },
+                  { label: "Carrier Markets", value: "6+" },
                   { label: "Quote Turnaround", value: "24h" },
-                  { label: "Exoneration Rate", value: "25%" },
+                  { label: "1099 Inclusive", value: "✓" },
                 ].map(b => (
                   <div key={b.label} className="text-center">
                     <div className="text-xl font-extrabold text-white">{b.value}</div>
@@ -97,51 +97,56 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — RiskDrive score card */}
+            {/* Right — AmTrust WC program card */}
             <div className="w-full lg:w-80 flex-shrink-0">
-              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="text-white font-bold text-sm">Network RiskDrive Score</div>
-                  <Shield className="w-4 h-4 text-slate-300" />
-                </div>
-
-                {/* Score gauge */}
-                <div className="text-center py-2">
-                  <div className="text-6xl font-extrabold" style={{ color: score !== null ? scoreColor : "#94A3B8" }}>
-                    {score ?? "—"}
+              <div className="bg-white/10 backdrop-blur border border-white/20 rounded-2xl p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+                    <HardHat className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-slate-400 text-xs mt-1">out of 100</div>
-                  {scoreTier && (
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
-                      style={{ background: scoreTier === "preferred" ? "#D1FAE5" : scoreTier === "standard" ? "#FEF3C7" : "#FEE2E2",
-                               color: scoreTier === "preferred" ? "#065F46" : scoreTier === "standard" ? "#92400E" : "#991B1B" }}>
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ background: scoreColor }} />
-                      {scoreTier === "preferred" ? "Preferred Market Access" : scoreTier === "standard" ? "Standard Market Access" : "Limited Market Access"}
-                    </div>
-                  )}
+                  <div>
+                    <div className="text-white font-bold text-sm">AmTrust WC Program</div>
+                    <div className="text-slate-400 text-[10px]">Towing Contractor Edition</div>
+                  </div>
                 </div>
 
-                {/* Score breakdown */}
                 <div className="space-y-2">
                   {[
-                    { label: "Safety Events", pct: 40, color: "#10B981" },
-                    { label: "Compliance", pct: 30, color: "#3B82F6" },
-                    { label: "Telematics", pct: 20, color: "#8B5CF6" },
-                    { label: "Training", pct: 10, color: "#E97132" },
-                  ].map(f => (
-                    <div key={f.label} className="flex items-center gap-2">
-                      <div className="text-[10px] text-slate-300 w-24">{f.label}</div>
-                      <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full" style={{ width: `${f.pct}%`, background: f.color }} />
-                      </div>
-                      <div className="text-[10px] text-slate-400 w-6 text-right">{f.pct}%</div>
+                    "Payroll-based class code rating",
+                    "1099 towing contractors fully included",
+                    "6+ competing carrier markets",
+                    "Experience mod (e-mod) factored in",
+                    "Loss run analysis included",
+                  ].map(item => (
+                    <div key={item} className="flex items-start gap-2">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span className="text-slate-300 text-xs leading-relaxed">{item}</span>
                     </div>
                   ))}
                 </div>
 
-                <Link href="/fleet-score" className="flex items-center justify-center gap-1.5 text-xs text-orange-400 hover:text-orange-300 transition-colors font-medium">
-                  Full score breakdown <ChevronRight className="w-3 h-3" />
-                </Link>
+                <div className="border-t border-white/10 pt-4 space-y-1.5">
+                  <div className="text-[10px] text-slate-400 uppercase tracking-wide mb-2">Key Class Codes</div>
+                  {[
+                    { code: "7383", label: "Emergency Roadside Towing" },
+                    { code: "7382", label: "Auto Service & Towing" },
+                    { code: "8810", label: "Clerical Office" },
+                  ].map(c => (
+                    <div key={c.code} className="flex items-center gap-2 text-xs">
+                      <span className="font-mono text-orange-300 font-semibold">{c.code}</span>
+                      <span className="text-slate-500">·</span>
+                      <span className="text-slate-300">{c.label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-emerald-500/15 border border-emerald-400/25 rounded-xl px-3 py-3">
+                  <div className="text-emerald-300 text-[10px] font-semibold uppercase tracking-wide mb-1">After Your Quote</div>
+                  <div className="text-slate-300 text-xs leading-relaxed">
+                    WC data preloaded into your telematics platform via API — or get a
+                    <span className="text-white font-medium"> discounted partner telematics solution</span>.
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -184,7 +189,7 @@ export default function Home() {
               </div>
               <div>
                 <div className="font-bold text-slate-900 text-sm">Workers Comp Quote</div>
-                <div className="text-xs text-slate-500">Telematics-rated · Multi-carrier · 24h turnaround</div>
+                <div className="text-xs text-slate-500">AmTrust Program · Multi-carrier · 24h turnaround</div>
               </div>
             </div>
             <Link href="/wc-quote" className="text-xs font-semibold text-teal-600 hover:text-teal-700 flex items-center gap-1">
@@ -336,8 +341,8 @@ function TruckLike({ className }: { className?: string }) {
 
 /* Finn inline mini-chat */
 function FinnInline() {
-  const [msgs, setMsgs] = useState([
-    { r: "finn" as const, t: "Hi! Ask me anything about WC quotes, your RiskDrive score, or 1099 compliance." }
+  const [msgs, setMsgs] = useState<{ r: "finn" | "user"; t: string }[]>([
+    { r: "finn", t: "Hi! Ask me anything about WC quotes, your RiskDrive score, or 1099 compliance." }
   ]);
   const [input, setInput] = useState("");
 

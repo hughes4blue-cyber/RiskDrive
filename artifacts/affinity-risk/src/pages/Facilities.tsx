@@ -87,7 +87,7 @@ export default function Facilities() {
                   <td className="px-4 py-3"><RiskBadge score={f.riskScore} tier={f.riskTier} /></td>
                   <td className="px-4 py-3 font-mono text-foreground">{f.totalDrivers}</td>
                   <td className="px-4 py-3 font-mono text-foreground">{f.totalVehicles}</td>
-                  <td className="px-4 py-3"><CertBadge status={f.certStatus} /></td>
+                  <td className="px-4 py-3"><CertBadge status={f.certStatus ?? "unknown"} /></td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${f.status === "active" ? "bg-emerald-100 text-emerald-800" : f.status === "suspended" ? "bg-red-100 text-red-800" : "bg-amber-100 text-amber-800"}`}>
                       {f.status}

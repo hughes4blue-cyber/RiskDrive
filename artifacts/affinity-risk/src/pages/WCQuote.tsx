@@ -11,7 +11,7 @@ const CLASS_CODES = [
   { code: "8810", desc: "Clerical Office Employees", rate: 0.28 },
 ];
 
-const STEPS = ["Operator Info", "Payroll & Class Codes", "Loss History", "Telematics Credit", "Review & Submit"];
+const STEPS = ["Operator Info", "Payroll & Class Codes", "Loss History", "Telematics Setup", "Review & Submit"];
 
 interface PayrollLine {
   classCode: string;
@@ -35,11 +35,9 @@ interface FormData {
   priorPremium: string;
   modFactor: string;
   lossYears: { year: string; claims: string; paid: string }[];
-  hasTelematics: boolean;
-  riskdriveScore: string;
-  criticalAlerts: string;
-  warningAlerts: string;
-  exonerationRate: string;
+  hasExistingTelematics: boolean;
+  telematicsProvider: string;
+  wantsPartnerTelematics: boolean;
 }
 
 const INITIAL: FormData = {
@@ -52,8 +50,9 @@ const INITIAL: FormData = {
     { year: "2024", claims: "", paid: "" },
     { year: "2025", claims: "", paid: "" },
   ],
-  hasTelematics: true,
-  riskdriveScore: "", criticalAlerts: "", warningAlerts: "", exonerationRate: "",
+  hasExistingTelematics: false,
+  telematicsProvider: "",
+  wantsPartnerTelematics: false,
 };
 
 function StepIndicator({ step, total }: { step: number; total: number }) {
@@ -78,12 +77,12 @@ function StepIndicator({ step, total }: { step: number; total: number }) {
 
 function FinnTip({ text }: { text: string }) {
   return (
-    <div className="flex gap-2.5 bg-amber-50 border border-amber-200 rounded-xl p-3">
+    <div className="flex gap-2.5 bg-orange-50 border border-orange-200 rounded-xl p-3">
       <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
-        style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)" }}>
+        style={{ background: "linear-gradient(135deg,#E97132,#C85A1F)" }}>
         <Bot className="w-3 h-3 text-white" />
       </div>
-      <p className="text-xs text-amber-800 leading-relaxed">{text}</p>
+      <p className="text-xs text-orange-900 leading-relaxed">{text}</p>
     </div>
   );
 }
@@ -129,27 +128,16 @@ function Select({ value, onChange, children }: { value: string; onChange: (v: st
 
 const US_STATES = ["AL","AK","AZ","AR","CA","CO","CT","DE","FL","GA","HI","ID","IL","IN","IA","KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM","NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA","WV","WI","WY"];
 
-// Demo pre-fill from "RiskDrive" data
-const DEMO_PREFILL = {
-  riskdriveScore: "74",
-  criticalAlerts: "4",
-  warningAlerts: "14",
-  exonerationRate: "25",
-};
-
-function computeEstimate(form: FormData): { gross: number; credit: number; net: number; mod: number } {
+function computeEstimate(form: FormData): { manual: number; gross: number; mod: number } {
   const mod = parseFloat(form.modFactor) || 1.0;
-  let gross = 0;
+  let manual = 0;
   for (const line of form.payrollLines) {
     const cc = CLASS_CODES.find(c => c.code === line.classCode);
     const payroll = parseFloat(line.payroll.replace(/,/g, "")) || 0;
-    if (cc) gross += (payroll / 100) * cc.rate;
+    if (cc) manual += (payroll / 100) * cc.rate;
   }
-  gross *= mod;
-  const score = parseFloat(form.riskdriveScore) || 0;
-  const creditPct = score >= 80 ? 0.18 : score >= 70 ? 0.14 : score >= 60 ? 0.08 : 0;
-  const credit = gross * creditPct;
-  return { gross: Math.round(gross), credit: Math.round(credit), net: Math.round(gross - credit), mod };
+  const gross = Math.round(manual * mod);
+  return { manual: Math.round(manual), gross, mod };
 }
 
 export default function WCQuote() {
@@ -161,10 +149,9 @@ export default function WCQuote() {
     setForm(prev => ({ ...prev, [key]: value }));
   }
 
-  function prefillFromRiskDrive() {
+  function prefillDemoData() {
     setForm(prev => ({
       ...prev,
-      ...DEMO_PREFILL,
       companyName: prev.companyName || "Metro Towing & Recovery",
       fein: prev.fein || "82-4391027",
       numDrivers: prev.numDrivers || "6",
@@ -180,7 +167,7 @@ export default function WCQuote() {
   if (submitted) {
     return (
       <div className="flex flex-col h-full">
-        <PageHeader title="Workers Comp Quote" subtitle="Affinity Risk — telematics-based Workers Compensation for tow operators" />
+        <PageHeader title="Workers Comp Quote" subtitle="AmTrust Program — Workers Compensation designed for towing contractors and 1099 operators" />
         <div className="flex-1 flex items-center justify-center p-8">
           <div className="max-w-md w-full text-center space-y-6">
             <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto">
@@ -191,27 +178,35 @@ export default function WCQuote() {
               <p className="text-sm text-gray-500 mt-1">Your Affinity Risk representative will follow up within 1 business day.</p>
             </div>
             <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 text-left space-y-3">
-              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Preliminary Estimate</div>
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">AmTrust Preliminary Estimate</div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Gross Manual Premium</span>
-                <span className="font-semibold">${estimate.gross.toLocaleString()}</span>
+                <span className="text-gray-600">Manual Premium (before mod)</span>
+                <span className="font-semibold">${estimate.manual.toLocaleString()}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Experience Mod ({form.modFactor}×)</span>
-                <span className="font-semibold">{estimate.mod < 1 ? "Credit" : "Debit"}</span>
+                <span className={`font-semibold ${estimate.mod < 1 ? "text-emerald-600" : estimate.mod > 1 ? "text-red-600" : "text-gray-800"}`}>
+                  {estimate.mod < 1 ? "Credit" : estimate.mod > 1 ? "Debit" : "Neutral"}
+                </span>
               </div>
-              {estimate.credit > 0 && (
-                <div className="flex justify-between text-sm text-emerald-600">
-                  <span>Affinity RiskDrive Credit</span>
-                  <span className="font-semibold">−${estimate.credit.toLocaleString()}</span>
-                </div>
-              )}
               <div className="border-t border-gray-200 pt-2 flex justify-between">
-                <span className="font-semibold text-gray-900">Estimated Net Premium</span>
-                <span className="font-bold text-blue-600 text-lg">${estimate.net.toLocaleString()}</span>
+                <span className="font-semibold text-gray-900">Estimated Annual Premium</span>
+                <span className="font-bold text-blue-600 text-lg">${estimate.gross.toLocaleString()}</span>
               </div>
             </div>
-            <FinnTip text="Your RiskDrive score qualified you for a telematics credit. Your broker will confirm final pricing after reviewing your loss runs and completing market submissions." />
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 text-left space-y-2">
+              <div className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Next Steps</div>
+              {form.hasExistingTelematics ? (
+                <p className="text-xs text-emerald-800 leading-relaxed">
+                  Your WC quote data will be <strong>preloaded into {form.telematicsProvider || "your telematics platform"} via API</strong> — no double entry required. Your Affinity Risk rep will confirm connectivity within 24 hours.
+                </p>
+              ) : (
+                <p className="text-xs text-emerald-800 leading-relaxed">
+                  Interested in telematics? Affinity Risk can connect you with a <strong>partner telematics solution at a discounted rate</strong> — ask Finn or your rep for details.
+                </p>
+              )}
+            </div>
+            <FinnTip text="Your Affinity Risk broker will confirm final pricing after reviewing your loss runs and submitting to AmTrust and competing markets. Final premium is subject to underwriter review." />
             <div className="flex gap-3">
               <Link href="/policies" className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium text-center hover:bg-blue-700 transition-colors">
                 View Liability Placement →
@@ -230,7 +225,7 @@ export default function WCQuote() {
     <div className="flex flex-col h-full">
       <PageHeader
         title="Workers Comp Quote"
-        subtitle="Affinity Risk — telematics-based Workers Compensation for tow operators"
+        subtitle="AmTrust Program — Workers Compensation designed for towing contractors and 1099 operators"
       />
 
       <div className="flex-1 overflow-y-auto bg-gray-50">
@@ -242,18 +237,18 @@ export default function WCQuote() {
 
           {/* Banner */}
           {step === 0 && (
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl px-5 py-4 text-white">
+            <div className="rounded-xl px-5 py-4 text-white" style={{ background: "linear-gradient(135deg,#0F2940,#0D3D56)" }}>
               <div className="flex items-center gap-3 mb-2">
-                <HardHat className="w-5 h-5 text-blue-200" />
-                <span className="font-bold">Workers Comp for Tow Operators</span>
+                <HardHat className="w-5 h-5 opacity-80" />
+                <span className="font-bold">AmTrust Workers Comp · Towing Contractor Edition</span>
               </div>
               <p className="text-blue-100 text-sm leading-relaxed">
-                Traditional WC is rated on guesses. Affinity RiskDrive rates on <strong>actual telematics data</strong> — your real driving behavior, incident rates, and coaching outcomes. Operators with strong data typically save 8–22% vs. standard market rates.
+                Affinity Risk places WC through AmTrust's dedicated towing contractor program — payroll and class-code rated with competitive experience modification factors. Covers 1099 contractors, owner-operators, and full-time employees on a single policy.
               </p>
               <div className="grid grid-cols-3 gap-3 mt-4">
                 {[
-                  { label: "Avg. Savings", value: "14%" },
-                  { label: "Markets", value: "6+" },
+                  { label: "Program", value: "AmTrust" },
+                  { label: "Class Codes", value: "7383+" },
                   { label: "Turnaround", value: "24h" },
                 ].map(s => (
                   <div key={s.label} className="bg-white/10 rounded-lg px-3 py-2 text-center">
@@ -276,11 +271,11 @@ export default function WCQuote() {
               {/* Step 0 — Operator Info */}
               {step === 0 && (
                 <>
-                  <FinnTip text="Finn tip: I can pre-fill your company info from your RiskDrive profile. Click 'Pre-fill from RiskDrive' to import what we already know about your operation." />
-                  <button onClick={prefillFromRiskDrive}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium hover:bg-amber-100 transition-colors">
+                  <FinnTip text="Finn tip: I can pre-fill your company info with demo data so you can explore the quote flow quickly. Click below to auto-populate key fields." />
+                  <button onClick={prefillDemoData}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-50 border border-orange-200 text-orange-700 text-sm font-medium hover:bg-orange-100 transition-colors">
                     <Bot className="w-4 h-4" />
-                    Pre-fill from Affinity RiskDrive
+                    Pre-fill Demo Data
                   </button>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Field label="Legal Business Name" required><Input value={form.companyName} onChange={v => set("companyName", v)} placeholder="Metro Towing & Recovery LLC" /></Field>
@@ -396,72 +391,70 @@ export default function WCQuote() {
                 </>
               )}
 
-              {/* Step 3 — Telematics Credit */}
+              {/* Step 3 — Telematics Setup */}
               {step === 3 && (
                 <>
-                  <FinnTip text="Finn tip: Your Affinity RiskDrive score is the key differentiator. Operators with a score of 70+ qualify for a premium credit of 8–18%. This data is pulled directly from your telematics profile — no guessing required." />
-                  <div className="flex items-center gap-3 mb-4">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={form.hasTelematics} onChange={e => set("hasTelematics", e.target.checked)}
-                        className="w-4 h-4 rounded accent-blue-600" />
-                      <span className="text-sm font-medium text-gray-700">This operator uses Affinity RiskDrive telematics</span>
-                    </label>
-                  </div>
-                  {form.hasTelematics && (
-                    <>
-                      <button onClick={() => set("riskdriveScore", DEMO_PREFILL.riskdriveScore)}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-sm font-medium hover:bg-amber-100 transition-colors mb-4">
-                        <Bot className="w-4 h-4" />
-                        Import Score from RiskDrive Profile
-                      </button>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <Field label="RiskDrive Score" hint="Composite score 0–100. 70+ qualifies for telematics credit.">
-                          <Input value={form.riskdriveScore} onChange={v => set("riskdriveScore", v)} placeholder="74" type="number" />
-                        </Field>
-                        <Field label="Critical Alerts (90d)"><Input value={form.criticalAlerts} onChange={v => set("criticalAlerts", v)} placeholder="4" type="number" /></Field>
-                        <Field label="Warning Alerts (90d)"><Input value={form.warningAlerts} onChange={v => set("warningAlerts", v)} placeholder="14" type="number" /></Field>
-                        <Field label="Exoneration Rate %" hint="% of claims where telematics data resulted in full exoneration"><Input value={form.exonerationRate} onChange={v => set("exonerationRate", v)} placeholder="25" type="number" /></Field>
-                      </div>
+                  <FinnTip text="Finn tip: After your WC quote is bound, Affinity Risk can preload your policy data directly into your telematics platform via API — eliminating double-entry. If you don't have telematics yet, we can connect you with a partner solution at a discounted rate." />
 
-                      {form.riskdriveScore && (
-                        <div className={`rounded-xl p-4 border mt-2 ${
-                          parseFloat(form.riskdriveScore) >= 80 ? "bg-emerald-50 border-emerald-200" :
-                          parseFloat(form.riskdriveScore) >= 70 ? "bg-blue-50 border-blue-200" :
-                          parseFloat(form.riskdriveScore) >= 60 ? "bg-amber-50 border-amber-200" :
-                          "bg-gray-50 border-gray-200"
-                        }`}>
-                          <div className="flex items-center gap-2 mb-2">
-                            <Shield className={`w-4 h-4 ${parseFloat(form.riskdriveScore) >= 70 ? "text-blue-600" : "text-gray-400"}`} />
-                            <span className="text-sm font-semibold text-gray-700">Telematics Credit Estimate</span>
+                  <div className="space-y-5">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700 mb-3">Do you currently use a telematics platform?</p>
+                      <div className="flex gap-3">
+                        <label className="flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors"
+                          style={form.hasExistingTelematics ? { borderColor: "#E97132", background: "#fff7f2" } : { borderColor: "#e2e8f0", background: "#f8fafc" }}>
+                          <input type="radio" name="hasTelematics" checked={form.hasExistingTelematics}
+                            onChange={() => set("hasExistingTelematics", true)} className="accent-orange-500" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-800">Yes — I use a telematics platform</div>
+                            <div className="text-xs text-gray-500">We'll connect via API after binding</div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div>
-                              <div className="text-2xl font-bold text-blue-600">
-                                {parseFloat(form.riskdriveScore) >= 80 ? "18%" :
-                                 parseFloat(form.riskdriveScore) >= 70 ? "14%" :
-                                 parseFloat(form.riskdriveScore) >= 60 ? "8%" : "0%"}
-                              </div>
-                              <div className="text-xs text-gray-500">Premium credit applied</div>
-                            </div>
-                            {estimate.credit > 0 && (
-                              <div>
-                                <div className="text-2xl font-bold text-emerald-600">−${estimate.credit.toLocaleString()}</div>
-                                <div className="text-xs text-gray-500">Estimated savings</div>
-                              </div>
-                            )}
+                        </label>
+                        <label className="flex-1 flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors"
+                          style={!form.hasExistingTelematics ? { borderColor: "#E97132", background: "#fff7f2" } : { borderColor: "#e2e8f0", background: "#f8fafc" }}>
+                          <input type="radio" name="hasTelematics" checked={!form.hasExistingTelematics}
+                            onChange={() => { set("hasExistingTelematics", false); set("telematicsProvider", ""); }} className="accent-orange-500" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-800">No — I don't have telematics</div>
+                            <div className="text-xs text-gray-500">Ask about our partner discount</div>
                           </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {!form.hasTelematics && (
-                    <div className="flex gap-2.5 bg-gray-50 border border-gray-200 rounded-xl p-4">
-                      <AlertCircle className="w-4 h-4 text-gray-400 flex-shrink-0 mt-0.5" />
-                      <div className="text-sm text-gray-600">
-                        Operators without Affinity RiskDrive are rated at standard market rates. Enrolling in RiskDrive typically saves 8–22% — ask Finn how to get started.
+                        </label>
                       </div>
                     </div>
-                  )}
+
+                    {form.hasExistingTelematics && (
+                      <div className="space-y-4">
+                        <Field label="Telematics Provider Name" hint="e.g. Samsara, Verizon Connect, Motive, Geotab, RiskDrive">
+                          <Input value={form.telematicsProvider} onChange={v => set("telematicsProvider", v)} placeholder="e.g. Samsara" />
+                        </Field>
+                        <div className="flex gap-2.5 bg-blue-50 border border-blue-200 rounded-xl p-4">
+                          <Shield className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-blue-800">
+                            After your policy binds, Affinity Risk will preload your WC policy data into <strong>{form.telematicsProvider || "your platform"}</strong> via API — driver rosters, class codes, and certificate details sync automatically with no double-entry required.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {!form.hasExistingTelematics && (
+                      <div className="space-y-4">
+                        <div className="flex gap-2.5 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                          <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                          <div className="text-sm text-orange-900">
+                            Telematics is the backbone of the <strong>RiskDrive Liability platform</strong>. Operators who add telematics unlock real-time driver scoring, incident exoneration data, and future liability premium credits.
+                          </div>
+                        </div>
+                        <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">
+                          <input type="checkbox" checked={form.wantsPartnerTelematics}
+                            onChange={e => set("wantsPartnerTelematics", e.target.checked)}
+                            className="mt-0.5 accent-orange-500" />
+                          <div>
+                            <div className="text-sm font-medium text-gray-800">Yes — I'm interested in Affinity Risk's partner telematics solution</div>
+                            <div className="text-xs text-gray-500 mt-0.5">Discounted hardware + activation for AmTrust WC policyholders. Your rep will share options after binding.</div>
+                          </div>
+                        </label>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
 
@@ -486,29 +479,25 @@ export default function WCQuote() {
                     </div>
 
                     <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Premium Estimate</div>
+                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">AmTrust Premium Estimate</div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Manual Premium (before mod)</span>
-                        <span className="font-medium">${Math.round(estimate.gross / (parseFloat(form.modFactor) || 1)).toLocaleString()}</span>
+                        <span className="font-medium">${estimate.manual.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-gray-500">Experience Mod ({form.modFactor}×)</span>
-                        <span className="font-medium">${estimate.gross.toLocaleString()}</span>
+                        <span className={`font-medium ${estimate.mod < 1 ? "text-emerald-600" : estimate.mod > 1 ? "text-red-600" : "text-gray-700"}`}>
+                          {estimate.mod < 1 ? "Credit" : estimate.mod > 1 ? "Debit" : "Neutral"}
+                        </span>
                       </div>
-                      {estimate.credit > 0 && (
-                        <div className="flex justify-between text-sm text-emerald-600">
-                          <span>RiskDrive Telematics Credit</span>
-                          <span className="font-semibold">−${estimate.credit.toLocaleString()}</span>
-                        </div>
-                      )}
                       <div className="border-t border-gray-200 pt-2 flex justify-between">
                         <span className="font-bold text-gray-800">Estimated Annual Premium</span>
-                        <span className="font-bold text-blue-600 text-lg">${estimate.net.toLocaleString()}</span>
+                        <span className="font-bold text-blue-600 text-lg">${estimate.gross.toLocaleString()}</span>
                       </div>
-                      {form.riskdriveScore && (
-                        <div className="flex items-center gap-1.5 text-xs text-emerald-600">
-                          <TrendingDown className="w-3 h-3" />
-                          RiskDrive Score {form.riskdriveScore} — telematics credit applied
+                      {form.hasExistingTelematics && (
+                        <div className="flex items-center gap-1.5 text-xs text-blue-600">
+                          <Shield className="w-3 h-3" />
+                          Telematics API connection: {form.telematicsProvider || "provider TBD"} — data preload after binding
                         </div>
                       )}
                     </div>
