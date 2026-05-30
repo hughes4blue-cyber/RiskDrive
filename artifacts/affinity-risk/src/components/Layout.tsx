@@ -62,8 +62,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
               <Shield className="w-4 h-4 text-white" />
             </div>
             <div>
-              <div className="text-white font-bold text-sm leading-tight">Affinity Risk</div>
-              <div className="text-[hsl(215,20%,55%)] text-[10px] leading-tight">Solutions for AAA Clubs</div>
+              <div className="text-white font-bold text-sm leading-tight">RiskDrive</div>
+              <div className="text-[hsl(215,20%,55%)] text-[10px] leading-tight">by Affinity Risk</div>
             </div>
           </div>
         </div>
