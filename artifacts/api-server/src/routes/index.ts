@@ -1,5 +1,7 @@
 import { Router, type IRouter } from "express";
+import { requireLiveMode, injectScopeParams } from "../middlewares/auth";
 import healthRouter from "./health";
+import authRouter from "./auth";
 import clubsRouter from "./clubs";
 import facilitiesRouter from "./facilities";
 import driversRouter from "./drivers";
@@ -17,7 +19,14 @@ import telematicsRouter from "./telematics";
 
 const router: IRouter = Router();
 
+// Auth + public endpoints — no mode gating
 router.use(healthRouter);
+router.use(authRouter);
+
+// All data routes: require live-mode auth when mode=live, then inject scope
+router.use(requireLiveMode);
+router.use(injectScopeParams);
+
 router.use(clubsRouter);
 router.use(facilitiesRouter);
 router.use(driversRouter);

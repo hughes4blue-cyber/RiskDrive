@@ -553,6 +553,54 @@ export interface ActivityPoint {
   trips: number;
 }
 
+export type AppModeMode = typeof AppModeMode[keyof typeof AppModeMode];
+
+
+export const AppModeMode = {
+  demo: 'demo',
+  live: 'live',
+} as const;
+
+export interface AppMode {
+  mode: AppModeMode;
+}
+
+export interface AdminUser {
+  id: number;
+  clerkUserId: string;
+  email: string;
+  /** @nullable */
+  role?: string | null;
+  approvalStatus: string;
+  /** @nullable */
+  clubId?: number | null;
+  /** @nullable */
+  facilityId?: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthMe {
+  mode: string;
+  authenticated: boolean;
+  user?: AdminUser | null;
+}
+
+export type ApproveUserInputRole = typeof ApproveUserInputRole[keyof typeof ApproveUserInputRole];
+
+
+export const ApproveUserInputRole = {
+  super_admin: 'super_admin',
+  club: 'club',
+  shop_owner: 'shop_owner',
+} as const;
+
+export interface ApproveUserInput {
+  role: ApproveUserInputRole;
+  clubId?: number;
+  facilityId?: number;
+}
+
 export type ListFacilitiesParams = {
 clubId?: number;
 };

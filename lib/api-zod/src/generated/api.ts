@@ -744,3 +744,106 @@ export const ListTelematicsEventsResponseItem = zod.object({
 export const ListTelematicsEventsResponse = zod.array(ListTelematicsEventsResponseItem)
 
 
+/**
+ * @summary Get current platform mode (demo or live) — public
+ */
+export const GetAppModeResponse = zod.object({
+  "mode": zod.enum(['demo', 'live'])
+})
+
+
+/**
+ * @summary Set platform mode — super-admin only
+ */
+export const UpdateAppModeBody = zod.object({
+  "mode": zod.enum(['demo', 'live'])
+})
+
+export const UpdateAppModeResponse = zod.object({
+  "mode": zod.enum(['demo', 'live'])
+})
+
+
+/**
+ * @summary Get current user info and platform mode
+ */
+export const GetCurrentUserResponse = zod.object({
+  "mode": zod.string(),
+  "authenticated": zod.boolean(),
+  "user": zod.union([zod.object({
+  "id": zod.number(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string().nullish(),
+  "approvalStatus": zod.string(),
+  "clubId": zod.number().nullish(),
+  "facilityId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+}),zod.null()]).optional()
+})
+
+
+/**
+ * @summary List all users — super-admin only
+ */
+export const ListAdminUsersResponseItem = zod.object({
+  "id": zod.number(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string().nullish(),
+  "approvalStatus": zod.string(),
+  "clubId": zod.number().nullish(),
+  "facilityId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListAdminUsersResponse = zod.array(ListAdminUsersResponseItem)
+
+
+/**
+ * @summary Approve a pending user and assign role — super-admin only
+ */
+export const ApproveUserParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+export const ApproveUserBody = zod.object({
+  "role": zod.enum(['super_admin', 'club', 'shop_owner']),
+  "clubId": zod.number().optional(),
+  "facilityId": zod.number().optional()
+})
+
+export const ApproveUserResponse = zod.object({
+  "id": zod.number(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string().nullish(),
+  "approvalStatus": zod.string(),
+  "clubId": zod.number().nullish(),
+  "facilityId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Deny a pending user — super-admin only
+ */
+export const DenyUserParams = zod.object({
+  "userId": zod.coerce.number()
+})
+
+export const DenyUserResponse = zod.object({
+  "id": zod.number(),
+  "clerkUserId": zod.string(),
+  "email": zod.string(),
+  "role": zod.string().nullish(),
+  "approvalStatus": zod.string(),
+  "clubId": zod.number().nullish(),
+  "facilityId": zod.number().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+

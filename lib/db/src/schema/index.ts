@@ -11,3 +11,5 @@ export * from "./policies";
 export * from "./claims";
 export * from "./settlements";
 export * from "./onboarding";
+export * from "./users";
+export * from "./app_settings";

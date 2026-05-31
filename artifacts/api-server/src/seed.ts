@@ -4,6 +4,8 @@ import {
   claimsTable,
   settlementRecordsTable,
   driverFeedbackTable,
+  usersTable,
+  appSettingsTable,
 } from "@workspace/db";
 import { sql } from "drizzle-orm";
 import { logger } from "./lib/logger";
@@ -71,6 +73,12 @@ export async function seedDemoDataIfEmpty() {
       logger.info("Seeding driver_feedback");
       await seedDriverFeedback();
     }
+
+    // Ensure app_settings row exists (default: demo)
+    await db
+      .insert(appSettingsTable)
+      .values({ id: 1, mode: "demo" })
+      .onConflictDoNothing();
 
     logger.info("Demo seed complete");
   } catch (err) {

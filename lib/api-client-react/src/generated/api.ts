@@ -23,6 +23,10 @@ import type {
   Accident,
   AccidentInput,
   ActivityPoint,
+  AdminUser,
+  AppMode,
+  ApproveUserInput,
+  AuthMe,
   BehaviorSuggestion,
   Certificate,
   CertificateInput,
@@ -2770,4 +2774,448 @@ export function useListTelematicsEvents<TData = Awaited<ReturnType<typeof listTe
 
 
 
+
+export const getGetAppModeUrl = () => {
+
+
+
+
+  return `/api/app-settings/mode`
+}
+
+/**
+ * @summary Get current platform mode (demo or live) — public
+ */
+export const getAppMode = async ( options?: RequestInit): Promise<AppMode> => {
+
+  return customFetch<AppMode>(getGetAppModeUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetAppModeQueryKey = () => {
+    return [
+    `/api/app-settings/mode`
+    ] as const;
+    }
+
+
+export const getGetAppModeQueryOptions = <TData = Awaited<ReturnType<typeof getAppMode>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAppMode>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetAppModeQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getAppMode>>> = ({ signal }) => getAppMode({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getAppMode>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetAppModeQueryResult = NonNullable<Awaited<ReturnType<typeof getAppMode>>>
+export type GetAppModeQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current platform mode (demo or live) — public
+ */
+
+export function useGetAppMode<TData = Awaited<ReturnType<typeof getAppMode>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getAppMode>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetAppModeQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateAppModeUrl = () => {
+
+
+
+
+  return `/api/app-settings/mode`
+}
+
+/**
+ * @summary Set platform mode — super-admin only
+ */
+export const updateAppMode = async (appMode: AppMode, options?: RequestInit): Promise<AppMode> => {
+
+  return customFetch<AppMode>(getUpdateAppModeUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      appMode,)
+  }
+);}
+
+
+
+
+export const getUpdateAppModeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAppMode>>, TError,{data: BodyType<AppMode>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateAppMode>>, TError,{data: BodyType<AppMode>}, TContext> => {
+
+const mutationKey = ['updateAppMode'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateAppMode>>, {data: BodyType<AppMode>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateAppMode(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateAppModeMutationResult = NonNullable<Awaited<ReturnType<typeof updateAppMode>>>
+    export type UpdateAppModeMutationBody = BodyType<AppMode>
+    export type UpdateAppModeMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Set platform mode — super-admin only
+ */
+export const useUpdateAppMode = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAppMode>>, TError,{data: BodyType<AppMode>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateAppMode>>,
+        TError,
+        {data: BodyType<AppMode>},
+        TContext
+      > => {
+      return useMutation(getUpdateAppModeMutationOptions(options));
+    }
+
+export const getGetCurrentUserUrl = () => {
+
+
+
+
+  return `/api/auth/me`
+}
+
+/**
+ * @summary Get current user info and platform mode
+ */
+export const getCurrentUser = async ( options?: RequestInit): Promise<AuthMe> => {
+
+  return customFetch<AuthMe>(getGetCurrentUserUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCurrentUserQueryKey = () => {
+    return [
+    `/api/auth/me`
+    ] as const;
+    }
+
+
+export const getGetCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCurrentUserQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUser>>> = ({ signal }) => getCurrentUser({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUser>>>
+export type GetCurrentUserQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get current user info and platform mode
+ */
+
+export function useGetCurrentUser<TData = Awaited<ReturnType<typeof getCurrentUser>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCurrentUserQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getListAdminUsersUrl = () => {
+
+
+
+
+  return `/api/admin/users`
+}
+
+/**
+ * @summary List all users — super-admin only
+ */
+export const listAdminUsers = async ( options?: RequestInit): Promise<AdminUser[]> => {
+
+  return customFetch<AdminUser[]>(getListAdminUsersUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListAdminUsersQueryKey = () => {
+    return [
+    `/api/admin/users`
+    ] as const;
+    }
+
+
+export const getListAdminUsersQueryOptions = <TData = Awaited<ReturnType<typeof listAdminUsers>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListAdminUsersQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listAdminUsers>>> = ({ signal }) => listAdminUsers({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listAdminUsers>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListAdminUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listAdminUsers>>>
+export type ListAdminUsersQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all users — super-admin only
+ */
+
+export function useListAdminUsers<TData = Awaited<ReturnType<typeof listAdminUsers>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listAdminUsers>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListAdminUsersQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getApproveUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/admin/users/${userId}/approve`
+}
+
+/**
+ * @summary Approve a pending user and assign role — super-admin only
+ */
+export const approveUser = async (userId: number,
+    approveUserInput: ApproveUserInput, options?: RequestInit): Promise<AdminUser> => {
+
+  return customFetch<AdminUser>(getApproveUserUrl(userId),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      approveUserInput,)
+  }
+);}
+
+
+
+
+export const getApproveUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveUser>>, TError,{userId: number;data: BodyType<ApproveUserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof approveUser>>, TError,{userId: number;data: BodyType<ApproveUserInput>}, TContext> => {
+
+const mutationKey = ['approveUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof approveUser>>, {userId: number;data: BodyType<ApproveUserInput>}> = (props) => {
+          const {userId,data} = props ?? {};
+
+          return  approveUser(userId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ApproveUserMutationResult = NonNullable<Awaited<ReturnType<typeof approveUser>>>
+    export type ApproveUserMutationBody = BodyType<ApproveUserInput>
+    export type ApproveUserMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Approve a pending user and assign role — super-admin only
+ */
+export const useApproveUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof approveUser>>, TError,{userId: number;data: BodyType<ApproveUserInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof approveUser>>,
+        TError,
+        {userId: number;data: BodyType<ApproveUserInput>},
+        TContext
+      > => {
+      return useMutation(getApproveUserMutationOptions(options));
+    }
+
+export const getDenyUserUrl = (userId: number,) => {
+
+
+
+
+  return `/api/admin/users/${userId}/deny`
+}
+
+/**
+ * @summary Deny a pending user — super-admin only
+ */
+export const denyUser = async (userId: number, options?: RequestInit): Promise<AdminUser> => {
+
+  return customFetch<AdminUser>(getDenyUserUrl(userId),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+export const getDenyUserMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof denyUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof denyUser>>, TError,{userId: number}, TContext> => {
+
+const mutationKey = ['denyUser'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof denyUser>>, {userId: number}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  denyUser(userId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DenyUserMutationResult = NonNullable<Awaited<ReturnType<typeof denyUser>>>
+
+    export type DenyUserMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Deny a pending user — super-admin only
+ */
+export const useDenyUser = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof denyUser>>, TError,{userId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof denyUser>>,
+        TError,
+        {userId: number},
+        TContext
+      > => {
+      return useMutation(getDenyUserMutationOptions(options));
+    }
 

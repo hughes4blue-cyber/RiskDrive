@@ -27,6 +27,10 @@ tags:
     description: Accident alert and claims operations
   - name: dashboard
     description: Dashboard summary operations
+  - name: auth
+    description: Authentication and app mode operations
+  - name: admin
+    description: Admin user management operations
 
 paths:
   /healthz:
@@ -699,6 +703,108 @@ paths:
                 items:
                   $ref: "#/components/schemas/TelematicsEvent"
 
+  /app-settings/mode:
+    get:
+      operationId: getAppMode
+      tags: [auth]
+      summary: Get current platform mode (demo or live) — public
+      responses:
+        "200":
+          description: Current mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppMode"
+    put:
+      operationId: updateAppMode
+      tags: [admin]
+      summary: Set platform mode — super-admin only
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppMode"
+      responses:
+        "200":
+          description: Updated mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AppMode"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current user info and platform mode
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthMe"
+
+  /admin/users:
+    get:
+      operationId: listAdminUsers
+      tags: [admin]
+      summary: List all users — super-admin only
+      responses:
+        "200":
+          description: All users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{userId}/approve:
+    put:
+      operationId: approveUser
+      tags: [admin]
+      summary: Approve a pending user and assign role — super-admin only
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApproveUserInput"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
+  /admin/users/{userId}/deny:
+    put:
+      operationId: denyUser
+      tags: [admin]
+      summary: Deny a pending user — super-admin only
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminUser"
+
 components:
   schemas:
     HealthStatus:
@@ -1268,4 +1374,60 @@ components:
         miles:
           type: number
         trips:
+          type: integer
+
+    AppMode:
+      type: object
+      required: [mode]
+      properties:
+        mode:
+          type: string
+          enum: [demo, live]
+
+    AdminUser:
+      type: object
+      required: [id, clerkUserId, email, approvalStatus, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        clerkUserId:
+          type: string
+        email:
+          type: string
+        role:
+          type: ["string", "null"]
+        approvalStatus:
+          type: string
+        clubId:
+          type: ["integer", "null"]
+        facilityId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    AuthMe:
+      type: object
+      required: [mode, authenticated]
+      properties:
+        mode:
+          type: string
+        authenticated:
+          type: boolean
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/AdminUser"
+            - type: "null"
+
+    ApproveUserInput:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [super_admin, club, shop_owner]
+        clubId:
+          type: integer
+        facilityId:
           type: integer
