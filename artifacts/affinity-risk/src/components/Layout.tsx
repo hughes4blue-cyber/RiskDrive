@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
+import { useUser, useClerk } from "@clerk/react";
 import {
   Bot, Menu, X, BarChart3, Users, Car, Trophy,
   MessageSquareWarning, AlertTriangle, Scale, FileCheck, HardHat,
   FileText, DollarSign, BookOpen, Building2, Truck, ClipboardCheck,
-  LayoutDashboard, Send, Satellite,
+  LayoutDashboard, Send, Satellite, LogIn, LogOut, Settings,
+  ToggleLeft, ToggleRight,
 } from "lucide-react";
+import { useGetCurrentUser, useGetAppMode } from "@workspace/api-client-react";
+
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 const NAV = [
   {
@@ -51,6 +56,94 @@ const NAV = [
     ],
   },
 ];
+
+function SidebarAuthSection() {
+  const { isSignedIn, isLoaded, user } = useUser();
+  const { signOut } = useClerk();
+  const { data: meData } = useGetCurrentUser();
+  const { data: modeData } = useGetAppMode();
+
+  const mode = modeData?.mode ?? (meData as { mode?: string } | undefined)?.mode ?? "demo";
+  const appUser = meData?.user;
+
+  const roleLabel =
+    appUser?.role === "super_admin" ? "Affinity Risk Admin" :
+    appUser?.role === "club" ? "AAA Club Admin" :
+    appUser?.role === "shop_owner" ? "Shop Owner" :
+    "Pending Approval";
+
+  const initials = (
+    user?.firstName?.[0] ??
+    user?.emailAddresses?.[0]?.emailAddress?.[0] ??
+    "?"
+  ).toUpperCase();
+
+  return (
+    <div className="px-3 pb-2 space-y-2 flex-shrink-0 border-b border-white/10 mb-1">
+      {/* Demo / Live badge */}
+      <div
+        className={`px-2.5 py-1.5 rounded-lg border text-[10px] font-bold flex items-center gap-1.5 ${
+          mode === "live"
+            ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+            : "bg-amber-500/15 border-amber-500/30 text-amber-400"
+        }`}
+      >
+        {mode === "live"
+          ? <ToggleRight className="w-3 h-3" />
+          : <ToggleLeft className="w-3 h-3" />}
+        {mode === "live" ? "LIVE MODE" : "DEMO MODE"}
+        <span className="ml-auto text-[9px] opacity-60">
+          {mode === "demo" ? "No login required" : "Auth required"}
+        </span>
+      </div>
+
+      {/* User info or sign-in prompt */}
+      {isLoaded && (
+        isSignedIn ? (
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-white/8">
+            <div className="w-7 h-7 rounded-full bg-orange-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {initials}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-white text-[11px] font-medium truncate">
+                {user?.firstName
+                  ? `${user.firstName}${user.lastName ? ` ${user.lastName}` : ""}`
+                  : user?.emailAddresses?.[0]?.emailAddress ?? "User"}
+              </div>
+              <div className="text-slate-500 text-[9px]">{roleLabel}</div>
+            </div>
+            <div className="flex gap-0.5 flex-shrink-0">
+              {appUser?.role === "super_admin" && (
+                <Link
+                  href="/admin"
+                  className="p-1 rounded text-slate-500 hover:text-white transition-colors"
+                  title="Admin Console"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                </Link>
+              )}
+              <button
+                onClick={() => void signOut({ redirectUrl: basePath || "/" })}
+                className="p-1 rounded text-slate-500 hover:text-red-400 transition-colors"
+                title="Sign out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <Link
+            href="/sign-in"
+            className="flex items-center gap-2 p-2 rounded-lg bg-white/8 text-slate-400 hover:text-white hover:bg-white/12 transition-colors"
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-medium">Sign in to RiskDrive</span>
+          </Link>
+        )
+      )}
+    </div>
+  );
+}
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [location] = useLocation();
@@ -134,6 +227,8 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             </div>
           ))}
         </nav>
+
+        <SidebarAuthSection />
 
         {/* Bottom CTAs */}
         <div className="p-3 border-t border-white/10 space-y-2 flex-shrink-0">

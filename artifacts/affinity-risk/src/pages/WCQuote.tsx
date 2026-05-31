@@ -11,7 +11,7 @@ const CLASS_CODES = [
   { code: "8810", desc: "Clerical Office Employees", rate: 0.28 },
 ];
 
-const STEPS = ["Operator Info", "Payroll & Class Codes", "Loss History", "Telematics Setup", "Review & Submit"];
+const STEPS = ["Operator Info", "Payroll & Class Codes", "Loss History", "Telematics Setup", "Payment Plan", "Review & Submit"];
 
 interface PayrollLine {
   classCode: string;
@@ -38,6 +38,8 @@ interface FormData {
   hasExistingTelematics: boolean;
   telematicsProvider: string;
   wantsPartnerTelematics: boolean;
+  paymentFrequency: "annual" | "quarterly" | "monthly" | "weekly";
+  usePayrollCompany: boolean;
 }
 
 const INITIAL: FormData = {
@@ -53,6 +55,8 @@ const INITIAL: FormData = {
   hasExistingTelematics: false,
   telematicsProvider: "",
   wantsPartnerTelematics: false,
+  paymentFrequency: "monthly",
+  usePayrollCompany: false,
 };
 
 function StepIndicator({ step, total }: { step: number; total: number }) {
@@ -458,8 +462,178 @@ export default function WCQuote() {
                 </>
               )}
 
-              {/* Step 4 — Review */}
+              {/* Step 4 — Payment Plan */}
               {step === 4 && (
+                <>
+                  <FinnTip text="Finn tip: AmTrust owns payroll processing companies — so towing contractors can pay WC premiums directly through payroll, weekly or monthly. Pay-as-you-go means your premium adjusts with actual payroll, eliminating year-end audit surprises." />
+
+                  {/* Payment frequency cards */}
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800 mb-3">How would you like to pay your premium?</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      {([
+                        {
+                          id: "weekly" as const,
+                          label: "Weekly",
+                          tag: "Most popular",
+                          desc: "Pay with your weekly payroll run — premium adjusts to actual labor costs",
+                          highlight: true,
+                        },
+                        {
+                          id: "monthly" as const,
+                          label: "Monthly",
+                          tag: "Recommended",
+                          desc: "12 equal payments via AmTrust payroll system",
+                          highlight: false,
+                        },
+                        {
+                          id: "quarterly" as const,
+                          label: "Quarterly",
+                          tag: "",
+                          desc: "4 payments per year — simple and predictable",
+                          highlight: false,
+                        },
+                        {
+                          id: "annual" as const,
+                          label: "Annual",
+                          tag: "5% discount",
+                          desc: "Full premium upfront — best rate, larger cash outlay",
+                          highlight: false,
+                        },
+                      ] as const).map((opt) => (
+                        <label
+                          key={opt.id}
+                          className={`relative flex flex-col gap-1.5 p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                            form.paymentFrequency === opt.id
+                              ? "border-orange-400 bg-orange-50"
+                              : "border-gray-200 bg-gray-50 hover:border-gray-300"
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name="paymentFrequency"
+                            value={opt.id}
+                            checked={form.paymentFrequency === opt.id}
+                            onChange={() => set("paymentFrequency", opt.id)}
+                            className="sr-only"
+                          />
+                          {opt.tag && (
+                            <span className={`absolute top-2 right-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                              opt.highlight ? "bg-orange-100 text-orange-700" : "bg-blue-100 text-blue-700"
+                            }`}>
+                              {opt.tag}
+                            </span>
+                          )}
+                          <span className="font-bold text-sm text-gray-900">{opt.label}</span>
+                          <span className="text-[11px] text-gray-500 leading-relaxed">{opt.desc}</span>
+                          {form.paymentFrequency === opt.id && (
+                            <span className="text-[10px] text-orange-600 font-semibold">Selected ✓</span>
+                          )}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* AmTrust payroll company option */}
+                  {(form.paymentFrequency === "weekly" || form.paymentFrequency === "monthly") && (
+                    <div className="space-y-3">
+                      <div className="rounded-xl overflow-hidden border border-blue-200">
+                        <div className="bg-blue-700 px-4 py-2.5 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <HardHat className="w-4 h-4 text-white" />
+                            <span className="text-white font-bold text-sm">AmTrust Payroll Integration</span>
+                          </div>
+                          <span className="text-blue-200 text-[10px] font-semibold uppercase tracking-wide">AmTrust Program</span>
+                        </div>
+                        <div className="bg-white p-4 space-y-3">
+                          <p className="text-sm text-gray-700 leading-relaxed">
+                            AmTrust owns payroll processing companies that integrate WC premium payments directly into
+                            your payroll run. Premium adjusts automatically each cycle based on <strong>actual payroll</strong> —
+                            no year-end audits, no surprise bills, no large upfront capital required.
+                          </p>
+
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { icon: "✓", label: "No year-end audit surprises", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+                              { icon: "✓", label: "Premium adjusts with actual payroll", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+                              { icon: "✓", label: "Add/remove drivers — premium updates automatically", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+                              { icon: "✓", label: "Same carrier — AmTrust program maintained", color: "text-emerald-700 bg-emerald-50 border-emerald-200" },
+                            ].map((item) => (
+                              <div key={item.label} className={`flex items-start gap-1.5 text-xs px-2.5 py-1.5 rounded-lg border ${item.color}`}>
+                                <span className="font-bold flex-shrink-0">{item.icon}</span>
+                                {item.label}
+                              </div>
+                            ))}
+                          </div>
+
+                          <label className="flex items-start gap-3 p-3 rounded-xl border border-blue-200 bg-blue-50 cursor-pointer hover:bg-blue-100 transition-colors">
+                            <input
+                              type="checkbox"
+                              checked={form.usePayrollCompany}
+                              onChange={(e) => set("usePayrollCompany", e.target.checked)}
+                              className="mt-0.5 accent-orange-500"
+                            />
+                            <div>
+                              <div className="text-sm font-semibold text-blue-900">
+                                Yes — I want to pay through AmTrust's payroll company
+                              </div>
+                              <div className="text-xs text-blue-700 mt-0.5">
+                                Your Affinity Risk rep will set up the integration after policy binds. Takes 1–2 business days.
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Estimated payment schedule */}
+                  {estimate.gross > 0 && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-2">
+                      <div className="text-xs font-semibold text-gray-600 uppercase tracking-wide mb-3">Estimated Payment Schedule</div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">Annual premium estimate</span>
+                        <span className="font-bold text-gray-800">${estimate.gross.toLocaleString()}</span>
+                      </div>
+                      {form.paymentFrequency === "annual" && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-emerald-600 font-medium">Annual payment (5% credit)</span>
+                          <span className="font-bold text-emerald-700">${Math.round(estimate.gross * 0.95).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {form.paymentFrequency === "quarterly" && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Per quarter (×4)</span>
+                          <span className="font-semibold">${Math.round(estimate.gross / 4).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {form.paymentFrequency === "monthly" && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Per month (×12)</span>
+                          <span className="font-semibold">${Math.round(estimate.gross / 12).toLocaleString()}</span>
+                        </div>
+                      )}
+                      {form.paymentFrequency === "weekly" && (
+                        <>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-500">Est. weekly payment</span>
+                            <span className="font-semibold">${Math.round(estimate.gross / 52).toLocaleString()}</span>
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Actual weekly amount adjusts based on reported payroll — this estimate is based on your entered payroll.
+                          </div>
+                        </>
+                      )}
+                      <div className="text-[10px] text-gray-400 pt-1 border-t border-gray-200">
+                        Subject to underwriter review. Final premium may vary. Experience mod applied.
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Step 5 — Review */}
+              {step === 5 && (
                 <>
                   <FinnTip text="Finn tip: Review your information before submitting. Your Affinity Risk broker will contact you within 1 business day with market options. Final pricing is subject to underwriter review of your loss runs." />
                   <div className="space-y-4">
