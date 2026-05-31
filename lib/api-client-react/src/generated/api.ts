@@ -34,18 +34,23 @@ import type {
   ClaimInput,
   Club,
   ClubSummary,
+  ConfirmInsuranceDocumentInput,
+  CreateInsuranceDocumentInput,
   DashboardOverview,
   Driver,
   DriverBehavior,
   DriverRiskItem,
+  ExtractedDocumentData,
   Facility,
   FacilitySummary,
   HealthStatus,
+  InsuranceDocument,
   ListAccidentsParams,
   ListAuditLogsParams,
   ListCertificatesParams,
   ListDriversParams,
   ListFacilitiesParams,
+  ListInsuranceDocumentsParams,
   ListTelematicsConnectionsParams,
   ListTelematicsEventsParams,
   ListVehiclesParams,
@@ -55,6 +60,8 @@ import type {
   TelematicsConnection,
   TelematicsConnectionInput,
   TelematicsEvent,
+  UploadUrlRequest,
+  UploadUrlResponse,
   Vehicle
 } from './api.schemas';
 
@@ -1483,6 +1490,374 @@ export function useGetDriverSuggestions<TData = Awaited<ReturnType<typeof getDri
 
 
 
+
+export const getRequestUploadUrlUrl = () => {
+
+
+
+
+  return `/api/storage/uploads/request-url`
+}
+
+/**
+ * @summary Request a presigned URL for file upload
+ */
+export const requestUploadUrl = async (uploadUrlRequest: UploadUrlRequest, options?: RequestInit): Promise<UploadUrlResponse> => {
+
+  return customFetch<UploadUrlResponse>(getRequestUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      uploadUrlRequest,)
+  }
+);}
+
+
+
+
+export const getRequestUploadUrlMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext> => {
+
+const mutationKey = ['requestUploadUrl'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof requestUploadUrl>>, {data: BodyType<UploadUrlRequest>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  requestUploadUrl(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RequestUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof requestUploadUrl>>>
+    export type RequestUploadUrlMutationBody = BodyType<UploadUrlRequest>
+    export type RequestUploadUrlMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Request a presigned URL for file upload
+ */
+export const useRequestUploadUrl = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof requestUploadUrl>>, TError,{data: BodyType<UploadUrlRequest>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof requestUploadUrl>>,
+        TError,
+        {data: BodyType<UploadUrlRequest>},
+        TContext
+      > => {
+      return useMutation(getRequestUploadUrlMutationOptions(options));
+    }
+
+export const getListInsuranceDocumentsUrl = (params: ListInsuranceDocumentsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/insurance-documents?${stringifiedParams}` : `/api/insurance-documents`
+}
+
+/**
+ * @summary List insurance documents for a facility
+ */
+export const listInsuranceDocuments = async (params: ListInsuranceDocumentsParams, options?: RequestInit): Promise<InsuranceDocument[]> => {
+
+  return customFetch<InsuranceDocument[]>(getListInsuranceDocumentsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListInsuranceDocumentsQueryKey = (params?: ListInsuranceDocumentsParams,) => {
+    return [
+    `/api/insurance-documents`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListInsuranceDocumentsQueryOptions = <TData = Awaited<ReturnType<typeof listInsuranceDocuments>>, TError = ErrorType<unknown>>(params: ListInsuranceDocumentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInsuranceDocuments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListInsuranceDocumentsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listInsuranceDocuments>>> = ({ signal }) => listInsuranceDocuments(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listInsuranceDocuments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListInsuranceDocumentsQueryResult = NonNullable<Awaited<ReturnType<typeof listInsuranceDocuments>>>
+export type ListInsuranceDocumentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List insurance documents for a facility
+ */
+
+export function useListInsuranceDocuments<TData = Awaited<ReturnType<typeof listInsuranceDocuments>>, TError = ErrorType<unknown>>(
+ params: ListInsuranceDocumentsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listInsuranceDocuments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListInsuranceDocumentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateInsuranceDocumentUrl = () => {
+
+
+
+
+  return `/api/insurance-documents`
+}
+
+/**
+ * @summary Save an uploaded insurance document record
+ */
+export const createInsuranceDocument = async (createInsuranceDocumentInput: CreateInsuranceDocumentInput, options?: RequestInit): Promise<InsuranceDocument> => {
+
+  return customFetch<InsuranceDocument>(getCreateInsuranceDocumentUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createInsuranceDocumentInput,)
+  }
+);}
+
+
+
+
+export const getCreateInsuranceDocumentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createInsuranceDocument>>, TError,{data: BodyType<CreateInsuranceDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createInsuranceDocument>>, TError,{data: BodyType<CreateInsuranceDocumentInput>}, TContext> => {
+
+const mutationKey = ['createInsuranceDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createInsuranceDocument>>, {data: BodyType<CreateInsuranceDocumentInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createInsuranceDocument(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateInsuranceDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof createInsuranceDocument>>>
+    export type CreateInsuranceDocumentMutationBody = BodyType<CreateInsuranceDocumentInput>
+    export type CreateInsuranceDocumentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Save an uploaded insurance document record
+ */
+export const useCreateInsuranceDocument = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createInsuranceDocument>>, TError,{data: BodyType<CreateInsuranceDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createInsuranceDocument>>,
+        TError,
+        {data: BodyType<CreateInsuranceDocumentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateInsuranceDocumentMutationOptions(options));
+    }
+
+export const getExtractInsuranceDocumentUrl = (documentId: number,) => {
+
+
+
+
+  return `/api/insurance-documents/${documentId}/extract`
+}
+
+/**
+ * @summary Run AI extraction on an uploaded document
+ */
+export const extractInsuranceDocument = async (documentId: number, options?: RequestInit): Promise<ExtractedDocumentData> => {
+
+  return customFetch<ExtractedDocumentData>(getExtractInsuranceDocumentUrl(documentId),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+export const getExtractInsuranceDocumentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractInsuranceDocument>>, TError,{documentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof extractInsuranceDocument>>, TError,{documentId: number}, TContext> => {
+
+const mutationKey = ['extractInsuranceDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof extractInsuranceDocument>>, {documentId: number}> = (props) => {
+          const {documentId} = props ?? {};
+
+          return  extractInsuranceDocument(documentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExtractInsuranceDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof extractInsuranceDocument>>>
+
+    export type ExtractInsuranceDocumentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Run AI extraction on an uploaded document
+ */
+export const useExtractInsuranceDocument = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractInsuranceDocument>>, TError,{documentId: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof extractInsuranceDocument>>,
+        TError,
+        {documentId: number},
+        TContext
+      > => {
+      return useMutation(getExtractInsuranceDocumentMutationOptions(options));
+    }
+
+export const getConfirmInsuranceDocumentUrl = (documentId: number,) => {
+
+
+
+
+  return `/api/insurance-documents/${documentId}/confirm`
+}
+
+/**
+ * @summary Confirm extracted data and create a certificate record (for COI docs)
+ */
+export const confirmInsuranceDocument = async (documentId: number,
+    confirmInsuranceDocumentInput: ConfirmInsuranceDocumentInput, options?: RequestInit): Promise<InsuranceDocument> => {
+
+  return customFetch<InsuranceDocument>(getConfirmInsuranceDocumentUrl(documentId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      confirmInsuranceDocumentInput,)
+  }
+);}
+
+
+
+
+export const getConfirmInsuranceDocumentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmInsuranceDocument>>, TError,{documentId: number;data: BodyType<ConfirmInsuranceDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof confirmInsuranceDocument>>, TError,{documentId: number;data: BodyType<ConfirmInsuranceDocumentInput>}, TContext> => {
+
+const mutationKey = ['confirmInsuranceDocument'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof confirmInsuranceDocument>>, {documentId: number;data: BodyType<ConfirmInsuranceDocumentInput>}> = (props) => {
+          const {documentId,data} = props ?? {};
+
+          return  confirmInsuranceDocument(documentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConfirmInsuranceDocumentMutationResult = NonNullable<Awaited<ReturnType<typeof confirmInsuranceDocument>>>
+    export type ConfirmInsuranceDocumentMutationBody = BodyType<ConfirmInsuranceDocumentInput>
+    export type ConfirmInsuranceDocumentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Confirm extracted data and create a certificate record (for COI docs)
+ */
+export const useConfirmInsuranceDocument = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof confirmInsuranceDocument>>, TError,{documentId: number;data: BodyType<ConfirmInsuranceDocumentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof confirmInsuranceDocument>>,
+        TError,
+        {documentId: number;data: BodyType<ConfirmInsuranceDocumentInput>},
+        TContext
+      > => {
+      return useMutation(getConfirmInsuranceDocumentMutationOptions(options));
+    }
 
 export const getListCertificatesUrl = (params?: ListCertificatesParams,) => {
   const normalizedParams = new URLSearchParams();

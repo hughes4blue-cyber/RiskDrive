@@ -14,3 +14,4 @@ export * from "./onboarding";
 export * from "./users";
 export * from "./app_settings";
 export * from "./audit_logs";
+export * from "./insurance_documents";

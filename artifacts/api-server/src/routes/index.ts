@@ -17,6 +17,8 @@ import settlementsRouter from "./settlements";
 import onboardingRouter from "./onboarding";
 import telematicsRouter from "./telematics";
 import auditRouter from "./audit";
+import storageRouter from "./storage";
+import insuranceDocumentsRouter from "./insurance_documents";
 
 const router: IRouter = Router();
 
@@ -45,5 +47,11 @@ router.use(telematicsRouter);
 
 // Audit log — super_admin only, no mode gating needed (requireAuth inside)
 router.use(auditRouter);
+
+// Object storage — presigned URL generation (public in demo, still gated in live via requireLiveMode above)
+router.use(storageRouter);
+
+// Insurance document upload + AI extraction
+router.use(insuranceDocumentsRouter);
 
 export default router;

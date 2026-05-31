@@ -33,6 +33,10 @@ tags:
     description: Admin user management operations
   - name: audit
     description: Audit log operations
+  - name: storage
+    description: Object storage upload and serving endpoints
+  - name: insurance-documents
+    description: Insurance document upload and AI extraction
 
 paths:
   /audit-logs:
@@ -391,6 +395,109 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/BehaviorSuggestion"
+
+  # ─── Object Storage ────────────────────────────────────────────────────────────
+  /storage/uploads/request-url:
+    post:
+      tags: [storage]
+      operationId: requestUploadUrl
+      summary: Request a presigned URL for file upload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadUrlRequest'
+      responses:
+        '200':
+          description: Presigned upload URL generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadUrlResponse'
+
+  # ─── Insurance Documents ────────────────────────────────────────────────────
+  /insurance-documents:
+    get:
+      tags: [insurance-documents]
+      operationId: listInsuranceDocuments
+      summary: List insurance documents for a facility
+      parameters:
+        - name: facilityId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of insurance documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InsuranceDocument'
+    post:
+      tags: [insurance-documents]
+      operationId: createInsuranceDocument
+      summary: Save an uploaded insurance document record
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInsuranceDocumentInput'
+      responses:
+        '201':
+          description: Document record created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceDocument'
+
+  /insurance-documents/{documentId}/extract:
+    post:
+      tags: [insurance-documents]
+      operationId: extractInsuranceDocument
+      summary: Run AI extraction on an uploaded document
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Extracted fields from the document
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtractedDocumentData'
+
+  /insurance-documents/{documentId}/confirm:
+    post:
+      tags: [insurance-documents]
+      operationId: confirmInsuranceDocument
+      summary: Confirm extracted data and create a certificate record (for COI docs)
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmInsuranceDocumentInput'
+      responses:
+        '200':
+          description: Document confirmed; certificate created if applicable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InsuranceDocument'
 
   # ─── Certificates of Insurance ────────────────────────────────────────────────
   /certificates:
@@ -1513,3 +1620,104 @@ components:
           type: integer
         facilityId:
           type: integer
+
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          minimum: 1
+        contentType:
+          type: string
+          minLength: 1
+
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+
+    InsuranceDocument:
+      type: object
+      required: [id, facilityId, documentType, fileName, fileKey, contentType, status, uploadedAt]
+      properties:
+        id:
+          type: integer
+        facilityId:
+          type: integer
+        documentType:
+          type: string
+          enum: [wc_coi, liability_coi, loss_run, liability_deck]
+        fileName:
+          type: string
+        fileKey:
+          type: string
+        contentType:
+          type: string
+        status:
+          type: string
+          enum: [uploaded, extracting, extracted, confirmed, error]
+        extractedData:
+          $ref: '#/components/schemas/ExtractedDocumentData'
+        certificateId:
+          type: ["integer", "null"]
+        uploadedAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ExtractedDocumentData:
+      type: object
+      properties:
+        policyNumber:
+          type: ["string", "null"]
+        insurer:
+          type: ["string", "null"]
+        insuredName:
+          type: ["string", "null"]
+        coverageType:
+          type: ["string", "null"]
+        effectiveDate:
+          type: ["string", "null"]
+        expirationDate:
+          type: ["string", "null"]
+        coverageAmount:
+          type: ["number", "null"]
+        claimsCount:
+          type: ["integer", "null"]
+        rawSummary:
+          type: ["string", "null"]
+        confidence:
+          type: ["string", "null"]
+          enum: [high, medium, low, null]
+
+    CreateInsuranceDocumentInput:
+      type: object
+      required: [facilityId, documentType, fileName, fileKey, contentType]
+      properties:
+        facilityId:
+          type: integer
+        documentType:
+          type: string
+          enum: [wc_coi, liability_coi, loss_run, liability_deck]
+        fileName:
+          type: string
+        fileKey:
+          type: string
+        contentType:
+          type: string
+
+    ConfirmInsuranceDocumentInput:
+      type: object
+      required: [extractedData]
+      properties:
+        extractedData:
+          $ref: '#/components/schemas/ExtractedDocumentData'

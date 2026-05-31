@@ -634,6 +634,113 @@ export interface ApproveUserInput {
   facilityId?: number;
 }
 
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+}
+
+export type InsuranceDocumentDocumentType = typeof InsuranceDocumentDocumentType[keyof typeof InsuranceDocumentDocumentType];
+
+
+export const InsuranceDocumentDocumentType = {
+  wc_coi: 'wc_coi',
+  liability_coi: 'liability_coi',
+  loss_run: 'loss_run',
+  liability_deck: 'liability_deck',
+} as const;
+
+export type InsuranceDocumentStatus = typeof InsuranceDocumentStatus[keyof typeof InsuranceDocumentStatus];
+
+
+export const InsuranceDocumentStatus = {
+  uploaded: 'uploaded',
+  extracting: 'extracting',
+  extracted: 'extracted',
+  confirmed: 'confirmed',
+  error: 'error',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ExtractedDocumentDataConfidence = typeof ExtractedDocumentDataConfidence[keyof typeof ExtractedDocumentDataConfidence] | null;
+
+
+export const ExtractedDocumentDataConfidence = {
+  high: 'high',
+  medium: 'medium',
+  low: 'low',
+} as const;
+
+export interface ExtractedDocumentData {
+  /** @nullable */
+  policyNumber?: string | null;
+  /** @nullable */
+  insurer?: string | null;
+  /** @nullable */
+  insuredName?: string | null;
+  /** @nullable */
+  coverageType?: string | null;
+  /** @nullable */
+  effectiveDate?: string | null;
+  /** @nullable */
+  expirationDate?: string | null;
+  /** @nullable */
+  coverageAmount?: number | null;
+  /** @nullable */
+  claimsCount?: number | null;
+  /** @nullable */
+  rawSummary?: string | null;
+  /** @nullable */
+  confidence?: ExtractedDocumentDataConfidence;
+}
+
+export interface InsuranceDocument {
+  id: number;
+  facilityId: number;
+  documentType: InsuranceDocumentDocumentType;
+  fileName: string;
+  fileKey: string;
+  contentType: string;
+  status: InsuranceDocumentStatus;
+  extractedData?: ExtractedDocumentData;
+  /** @nullable */
+  certificateId?: number | null;
+  uploadedAt: string;
+  updatedAt?: string;
+}
+
+export type CreateInsuranceDocumentInputDocumentType = typeof CreateInsuranceDocumentInputDocumentType[keyof typeof CreateInsuranceDocumentInputDocumentType];
+
+
+export const CreateInsuranceDocumentInputDocumentType = {
+  wc_coi: 'wc_coi',
+  liability_coi: 'liability_coi',
+  loss_run: 'loss_run',
+  liability_deck: 'liability_deck',
+} as const;
+
+export interface CreateInsuranceDocumentInput {
+  facilityId: number;
+  documentType: CreateInsuranceDocumentInputDocumentType;
+  fileName: string;
+  fileKey: string;
+  contentType: string;
+}
+
+export interface ConfirmInsuranceDocumentInput {
+  extractedData: ExtractedDocumentData;
+}
+
 export type ListAuditLogsParams = {
 page?: number;
 limit?: number;
@@ -651,6 +758,10 @@ facilityId?: number;
 
 export type ListVehiclesParams = {
 facilityId?: number;
+};
+
+export type ListInsuranceDocumentsParams = {
+facilityId: number;
 };
 
 export type ListCertificatesParams = {

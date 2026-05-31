@@ -430,6 +430,141 @@ export const GetDriverSuggestionsResponse = zod.array(GetDriverSuggestionsRespon
 
 
 /**
+ * @summary Request a presigned URL for file upload
+ */
+
+
+
+
+
+export const RequestUploadUrlBody = zod.object({
+  "name": zod.string().min(1),
+  "size": zod.number().min(1),
+  "contentType": zod.string().min(1)
+})
+
+export const RequestUploadUrlResponse = zod.object({
+  "uploadURL": zod.string().url(),
+  "objectPath": zod.string()
+})
+
+
+/**
+ * @summary List insurance documents for a facility
+ */
+export const ListInsuranceDocumentsQueryParams = zod.object({
+  "facilityId": zod.coerce.number()
+})
+
+export const ListInsuranceDocumentsResponseItem = zod.object({
+  "id": zod.number(),
+  "facilityId": zod.number(),
+  "documentType": zod.enum(['wc_coi', 'liability_coi', 'loss_run', 'liability_deck']),
+  "fileName": zod.string(),
+  "fileKey": zod.string(),
+  "contentType": zod.string(),
+  "status": zod.enum(['uploaded', 'extracting', 'extracted', 'confirmed', 'error']),
+  "extractedData": zod.object({
+  "policyNumber": zod.string().nullish(),
+  "insurer": zod.string().nullish(),
+  "insuredName": zod.string().nullish(),
+  "coverageType": zod.string().nullish(),
+  "effectiveDate": zod.string().nullish(),
+  "expirationDate": zod.string().nullish(),
+  "coverageAmount": zod.number().nullish(),
+  "claimsCount": zod.number().nullish(),
+  "rawSummary": zod.string().nullish(),
+  "confidence": zod.union([zod.literal('high'),zod.literal('medium'),zod.literal('low'),zod.literal(null)]).nullish()
+}).optional(),
+  "certificateId": zod.number().nullish(),
+  "uploadedAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+export const ListInsuranceDocumentsResponse = zod.array(ListInsuranceDocumentsResponseItem)
+
+
+/**
+ * @summary Save an uploaded insurance document record
+ */
+export const CreateInsuranceDocumentBody = zod.object({
+  "facilityId": zod.number(),
+  "documentType": zod.enum(['wc_coi', 'liability_coi', 'loss_run', 'liability_deck']),
+  "fileName": zod.string(),
+  "fileKey": zod.string(),
+  "contentType": zod.string()
+})
+
+
+/**
+ * @summary Run AI extraction on an uploaded document
+ */
+export const ExtractInsuranceDocumentParams = zod.object({
+  "documentId": zod.coerce.number()
+})
+
+export const ExtractInsuranceDocumentResponse = zod.object({
+  "policyNumber": zod.string().nullish(),
+  "insurer": zod.string().nullish(),
+  "insuredName": zod.string().nullish(),
+  "coverageType": zod.string().nullish(),
+  "effectiveDate": zod.string().nullish(),
+  "expirationDate": zod.string().nullish(),
+  "coverageAmount": zod.number().nullish(),
+  "claimsCount": zod.number().nullish(),
+  "rawSummary": zod.string().nullish(),
+  "confidence": zod.union([zod.literal('high'),zod.literal('medium'),zod.literal('low'),zod.literal(null)]).nullish()
+})
+
+
+/**
+ * @summary Confirm extracted data and create a certificate record (for COI docs)
+ */
+export const ConfirmInsuranceDocumentParams = zod.object({
+  "documentId": zod.coerce.number()
+})
+
+export const ConfirmInsuranceDocumentBody = zod.object({
+  "extractedData": zod.object({
+  "policyNumber": zod.string().nullish(),
+  "insurer": zod.string().nullish(),
+  "insuredName": zod.string().nullish(),
+  "coverageType": zod.string().nullish(),
+  "effectiveDate": zod.string().nullish(),
+  "expirationDate": zod.string().nullish(),
+  "coverageAmount": zod.number().nullish(),
+  "claimsCount": zod.number().nullish(),
+  "rawSummary": zod.string().nullish(),
+  "confidence": zod.union([zod.literal('high'),zod.literal('medium'),zod.literal('low'),zod.literal(null)]).nullish()
+})
+})
+
+export const ConfirmInsuranceDocumentResponse = zod.object({
+  "id": zod.number(),
+  "facilityId": zod.number(),
+  "documentType": zod.enum(['wc_coi', 'liability_coi', 'loss_run', 'liability_deck']),
+  "fileName": zod.string(),
+  "fileKey": zod.string(),
+  "contentType": zod.string(),
+  "status": zod.enum(['uploaded', 'extracting', 'extracted', 'confirmed', 'error']),
+  "extractedData": zod.object({
+  "policyNumber": zod.string().nullish(),
+  "insurer": zod.string().nullish(),
+  "insuredName": zod.string().nullish(),
+  "coverageType": zod.string().nullish(),
+  "effectiveDate": zod.string().nullish(),
+  "expirationDate": zod.string().nullish(),
+  "coverageAmount": zod.number().nullish(),
+  "claimsCount": zod.number().nullish(),
+  "rawSummary": zod.string().nullish(),
+  "confidence": zod.union([zod.literal('high'),zod.literal('medium'),zod.literal('low'),zod.literal(null)]).nullish()
+}).optional(),
+  "certificateId": zod.number().nullish(),
+  "uploadedAt": zod.string(),
+  "updatedAt": zod.string().optional()
+})
+
+
+/**
  * @summary List certificates of insurance, optionally filtered by facility
  */
 export const ListCertificatesQueryParams = zod.object({
