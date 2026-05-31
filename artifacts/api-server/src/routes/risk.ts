@@ -26,7 +26,7 @@ function buildFactors(events: { eventType: string }[]): Array<{ name: string; im
 }
 
 router.get("/risk/facility/:facilityId", async (req, res) => {
-  const facilityId = parseInt(req.params.facilityId);
+  const facilityId = parseInt(req.params.facilityId as string);
   const [facility] = await db.select().from(facilitiesTable).where(eq(facilitiesTable.id, facilityId));
   if (!facility) return res.status(404).json({ error: "Facility not found" });
 
@@ -34,7 +34,7 @@ router.get("/risk/facility/:facilityId", async (req, res) => {
   const events = await db.select().from(telematicsEventsTable);
   const facilityEvents = events.filter(e => vehicles.some(v => v.id === e.vehicleId));
 
-  res.json({
+  return res.json({
     entityId: facilityId,
     entityType: "facility",
     score: facility.riskScore,
@@ -46,13 +46,13 @@ router.get("/risk/facility/:facilityId", async (req, res) => {
 });
 
 router.get("/risk/driver/:driverId", async (req, res) => {
-  const driverId = parseInt(req.params.driverId);
+  const driverId = parseInt(req.params.driverId as string);
   const [driver] = await db.select().from(driversTable).where(eq(driversTable.id, driverId));
   if (!driver) return res.status(404).json({ error: "Driver not found" });
 
   const events = await db.select().from(telematicsEventsTable).where(eq(telematicsEventsTable.driverId, driverId));
 
-  res.json({
+  return res.json({
     entityId: driverId,
     entityType: "driver",
     score: driver.riskScore,
@@ -64,13 +64,13 @@ router.get("/risk/driver/:driverId", async (req, res) => {
 });
 
 router.get("/risk/vehicle/:vehicleId", async (req, res) => {
-  const vehicleId = parseInt(req.params.vehicleId);
+  const vehicleId = parseInt(req.params.vehicleId as string);
   const [vehicle] = await db.select().from(vehiclesTable).where(eq(vehiclesTable.id, vehicleId));
   if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
 
   const events = await db.select().from(telematicsEventsTable).where(eq(telematicsEventsTable.vehicleId, vehicleId));
 
-  res.json({
+  return res.json({
     entityId: vehicleId,
     entityType: "vehicle",
     score: vehicle.riskScore,
@@ -82,7 +82,7 @@ router.get("/risk/vehicle/:vehicleId", async (req, res) => {
 });
 
 router.get("/risk/suggestions/:driverId", async (req, res) => {
-  const driverId = parseInt(req.params.driverId);
+  const driverId = parseInt(req.params.driverId as string);
   const [driver] = await db.select().from(driversTable).where(eq(driversTable.id, driverId));
   if (!driver) return res.status(404).json({ error: "Driver not found" });
 
@@ -133,7 +133,7 @@ router.get("/risk/suggestions/:driverId", async (req, res) => {
     });
   }
 
-  res.json(suggestions);
+  return res.json(suggestions);
 });
 
 export default router;

@@ -22,10 +22,10 @@ router.get("/clubs", async (req, res) => {
 });
 
 router.get("/clubs/:clubId", async (req, res) => {
-  const clubId = parseInt(req.params.clubId);
+  const clubId = parseInt(req.params.clubId as string);
   const [club] = await db.select().from(clubsTable).where(eq(clubsTable.id, clubId));
   if (!club) return res.status(404).json({ error: "Club not found" });
-  res.json({
+  return res.json({
     ...club,
     createdAt: club.createdAt?.toISOString() ?? new Date().toISOString(),
   });

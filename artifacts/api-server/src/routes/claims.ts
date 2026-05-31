@@ -63,14 +63,14 @@ router.get("/claims/summary", async (_req, res) => {
 });
 
 router.get("/claims/:claimId", async (req, res) => {
-  const id = parseInt(req.params.claimId);
+  const id = parseInt(req.params.claimId as string);
   const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
   if (!c) return res.status(404).json({ error: "Claim not found" });
-  res.json(await formatClaim(c));
+  return res.json(await formatClaim(c));
 });
 
 router.patch("/claims/:claimId/advance", async (req, res) => {
-  const id = parseInt(req.params.claimId);
+  const id = parseInt(req.params.claimId as string);
   const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
   if (!c) return res.status(404).json({ error: "Claim not found" });
   const idx = CLAIM_STEPS.indexOf(c.status);
@@ -88,7 +88,7 @@ router.patch("/claims/:claimId/advance", async (req, res) => {
   if (req.body.litigationNotes) { update.litigationNotes = req.body.litigationNotes; update.isLitigated = true; }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [updated] = await db.update(claimsTable).set(update as any).where(eq(claimsTable.id, id)).returning();
-  res.json(await formatClaim(updated));
+  return res.json(await formatClaim(updated));
 });
 
 export default router;

@@ -31,8 +31,42 @@ tags:
     description: Authentication and app mode operations
   - name: admin
     description: Admin user management operations
+  - name: audit
+    description: Audit log operations
 
 paths:
+  /audit-logs:
+    get:
+      operationId: listAuditLogs
+      tags: [audit]
+      summary: List audit log entries (super-admin only)
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: resourceType
+          in: query
+          schema:
+            type: string
+        - name: userId
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated audit log
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogList"
+        "403":
+          description: Forbidden
+
   /healthz:
     get:
       operationId: healthCheck
@@ -1419,6 +1453,54 @@ components:
           oneOf:
             - $ref: "#/components/schemas/AdminUser"
             - type: "null"
+
+    AuditLog:
+      type: object
+      required: [id, action, resourceType, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: ["string", "null"]
+        userEmail:
+          type: ["string", "null"]
+        userRole:
+          type: ["string", "null"]
+        action:
+          type: string
+        resourceType:
+          type: string
+        resourceId:
+          type: ["string", "null"]
+        ipAddress:
+          type: ["string", "null"]
+        userAgent:
+          type: ["string", "null"]
+        metadata:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    AuditLogList:
+      type: object
+      required: [data, pagination]
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLog"
+        pagination:
+          type: object
+          required: [page, limit, total, totalPages]
+          properties:
+            page:
+              type: integer
+            limit:
+              type: integer
+            total:
+              type: integer
+            totalPages:
+              type: integer
 
     ApproveUserInput:
       type: object

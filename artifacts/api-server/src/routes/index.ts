@@ -16,6 +16,7 @@ import claimsRouter from "./claims";
 import settlementsRouter from "./settlements";
 import onboardingRouter from "./onboarding";
 import telematicsRouter from "./telematics";
+import auditRouter from "./audit";
 
 const router: IRouter = Router();
 
@@ -41,5 +42,8 @@ router.use(claimsRouter);
 router.use(settlementsRouter);
 router.use(onboardingRouter);
 router.use(telematicsRouter);
+
+// Audit log — super_admin only, no mode gating needed (requireAuth inside)
+router.use(auditRouter);
 
 export default router;

@@ -60,14 +60,14 @@ router.get("/onboarding", async (req, res) => {
 });
 
 router.get("/onboarding/:facilityId", async (req, res) => {
-  const facilityId = parseInt(req.params.facilityId);
+  const facilityId = parseInt(req.params.facilityId as string);
   const [row] = await db.select().from(onboardingChecklistsTable).where(eq(onboardingChecklistsTable.facilityId, facilityId));
   if (!row) return res.status(404).json({ error: "Onboarding record not found" });
-  res.json(await formatChecklist(row));
+  return res.json(await formatChecklist(row));
 });
 
 router.patch("/onboarding/:facilityId", async (req, res) => {
-  const facilityId = parseInt(req.params.facilityId);
+  const facilityId = parseInt(req.params.facilityId as string);
   const [existing] = await db.select().from(onboardingChecklistsTable).where(eq(onboardingChecklistsTable.facilityId, facilityId));
   if (!existing) return res.status(404).json({ error: "Onboarding record not found" });
 
@@ -81,7 +81,7 @@ router.patch("/onboarding/:facilityId", async (req, res) => {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [updated] = await db.update(onboardingChecklistsTable).set(update as any).where(eq(onboardingChecklistsTable.facilityId, facilityId)).returning();
-  res.json(await formatChecklist(updated));
+  return res.json(await formatChecklist(updated));
 });
 
 // Driver feedback feed
@@ -113,17 +113,17 @@ router.get("/driver-feedback", async (req, res) => {
       acknowledgedAt: e.acknowledgedAt?.toISOString() ?? null,
     };
   }));
-  res.json(result);
+  return res.json(result);
 });
 
 router.patch("/driver-feedback/:feedbackId/acknowledge", async (req, res) => {
-  const id = parseInt(req.params.feedbackId);
+  const id = parseInt(req.params.feedbackId as string);
   const [updated] = await db.update(driverFeedbackTable)
     .set({ acknowledged: true, acknowledgedAt: new Date() })
     .where(eq(driverFeedbackTable.id, id))
     .returning();
   if (!updated) return res.status(404).json({ error: "Feedback not found" });
-  res.json({ id: updated.id, acknowledged: true });
+  return res.json({ id: updated.id, acknowledged: true });
 });
 
 // Driver leaderboard

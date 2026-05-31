@@ -68,18 +68,18 @@ router.post("/submissions", async (req, res) => {
     notes: notes ?? null,
   }).returning();
 
-  res.status(201).json(await formatSubmission(s));
+  return res.status(201).json(await formatSubmission(s));
 });
 
 router.get("/submissions/:submissionId", async (req, res) => {
-  const id = parseInt(req.params.submissionId);
+  const id = parseInt(req.params.submissionId as string);
   const [s] = await db.select().from(submissionsTable).where(eq(submissionsTable.id, id));
   if (!s) return res.status(404).json({ error: "Submission not found" });
-  res.json(await formatSubmission(s));
+  return res.json(await formatSubmission(s));
 });
 
 router.patch("/submissions/:submissionId/advance", async (req, res) => {
-  const id = parseInt(req.params.submissionId);
+  const id = parseInt(req.params.submissionId as string);
   const [s] = await db.select().from(submissionsTable).where(eq(submissionsTable.id, id));
   if (!s) return res.status(404).json({ error: "Submission not found" });
 
@@ -104,7 +104,7 @@ router.patch("/submissions/:submissionId/advance", async (req, res) => {
   if (carrierName !== undefined) update.carrierName = carrierName;
 
   const [updated] = await db.update(submissionsTable).set(update).where(eq(submissionsTable.id, id)).returning();
-  res.json(await formatSubmission(updated));
+  return res.json(await formatSubmission(updated));
 });
 
 router.get("/policies", async (req, res) => {
@@ -123,14 +123,14 @@ router.get("/policies", async (req, res) => {
 });
 
 router.get("/policies/:policyId", async (req, res) => {
-  const id = parseInt(req.params.policyId);
+  const id = parseInt(req.params.policyId as string);
   const [p] = await db.select().from(policiesTable).where(eq(policiesTable.id, id));
   if (!p) return res.status(404).json({ error: "Policy not found" });
   const [fac] = await db.select({ f: facilitiesTable, clubName: clubsTable.name })
     .from(facilitiesTable)
     .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id))
     .where(eq(facilitiesTable.id, p.facilityId));
-  res.json(formatPolicy(p, fac?.f.name, fac?.clubName));
+  return res.json(formatPolicy(p, fac?.f.name, fac?.clubName));
 });
 
 export default router;

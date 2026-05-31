@@ -2,10 +2,11 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { vehiclesTable, facilitiesTable, driversTable, telematicsEventsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { auditAccess } from "../middlewares/audit";
 
 const router = Router();
 
-router.get("/vehicles", async (req, res) => {
+router.get("/vehicles", auditAccess("vehicle"), async (req, res) => {
   const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
   let rows;
   if (facilityId) {
@@ -40,8 +41,8 @@ router.get("/vehicles", async (req, res) => {
   })));
 });
 
-router.get("/vehicles/:vehicleId", async (req, res) => {
-  const vehicleId = parseInt(req.params.vehicleId);
+router.get("/vehicles/:vehicleId", auditAccess("vehicle", (r) => r.params.vehicleId), async (req, res) => {
+  const vehicleId = parseInt(String(req.params.vehicleId));
   const [row] = await db.select({
     vehicle: vehiclesTable,
     facilityName: facilitiesTable.name,
@@ -54,7 +55,7 @@ router.get("/vehicles/:vehicleId", async (req, res) => {
 
   if (!row) return res.status(404).json({ error: "Vehicle not found" });
   const { vehicle: v, facilityName, driverFirst, driverLast } = row;
-  res.json({
+  return res.json({
     id: v.id, facilityId: v.facilityId, facilityName, make: v.make, model: v.model,
     year: v.year, licensePlate: v.licensePlate, vin: v.vin, type: v.type,
     status: v.status, riskScore: v.riskScore, riskTier: v.riskTier,

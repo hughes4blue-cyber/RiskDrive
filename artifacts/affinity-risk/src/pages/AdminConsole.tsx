@@ -1,13 +1,33 @@
 import { useState } from "react";
-import { useGetCurrentUser, useGetAppMode, useListAdminUsers, useApproveUser, useDenyUser, useUpdateAppMode, ApproveUserInputRole } from "@workspace/api-client-react";
+import {
+  useGetCurrentUser,
+  useGetAppMode,
+  useListAdminUsers,
+  useApproveUser,
+  useDenyUser,
+  useUpdateAppMode,
+  useListAuditLogs,
+  ApproveUserInputRole,
+} from "@workspace/api-client-react";
 import { PageHeader } from "@/components/Layout";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Shield, Users, ToggleLeft, ToggleRight, CheckCircle, XCircle, AlertCircle } from "lucide-react";
+import {
+  Shield,
+  Users,
+  ToggleLeft,
+  ToggleRight,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  ScrollText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 export default function AdminConsole() {
   const { data: meData } = useGetCurrentUser();
   const appUser = meData?.user;
-  const [tab, setTab] = useState<"mode" | "users">("mode");
+  const [tab, setTab] = useState<"mode" | "users" | "audit">("mode");
 
   if (!appUser || appUser.role !== "super_admin") {
     return (
@@ -22,7 +42,7 @@ export default function AdminConsole() {
     <div>
       <PageHeader
         title="Admin Console"
-        subtitle="Manage platform mode and user access"
+        subtitle="Manage platform mode, user access, and DPPA audit trail"
       />
       <div className="p-6">
         {/* Tabs */}
@@ -49,10 +69,22 @@ export default function AdminConsole() {
             <Users className="w-4 h-4" />
             User Management
           </button>
+          <button
+            onClick={() => setTab("audit")}
+            className={`flex items-center gap-2 px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === "audit"
+                ? "border-teal-600 text-teal-700"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            <ScrollText className="w-4 h-4" />
+            DPPA Audit Log
+          </button>
         </div>
 
         {tab === "mode" && <ModeTab />}
         {tab === "users" && <UsersTab />}
+        {tab === "audit" && <AuditTab />}
       </div>
     </div>
   );
@@ -322,6 +354,164 @@ function UsersTab() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const RESOURCE_TYPES = [
+  { value: "", label: "All resources" },
+  { value: "driver", label: "Driver" },
+  { value: "driver.behavior", label: "Driver behavior" },
+  { value: "vehicle", label: "Vehicle" },
+];
+
+function AuditTab() {
+  const [page, setPage] = useState(1);
+  const [resourceType, setResourceType] = useState("");
+
+  const { data, isLoading } = useListAuditLogs({
+    page,
+    limit: 50,
+    ...(resourceType ? { resourceType } : {}),
+  });
+
+  const logs = data?.data ?? [];
+  const pagination = data?.pagination;
+
+  function formatTime(iso: string) {
+    return new Date(iso).toLocaleString(undefined, {
+      month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+    });
+  }
+
+  function resourceBadgeColor(rt: string) {
+    if (rt.startsWith("driver")) return "bg-blue-50 text-blue-700";
+    if (rt.startsWith("vehicle")) return "bg-teal-50 text-teal-700";
+    return "bg-slate-100 text-slate-600";
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Header + DPPA note */}
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="flex items-center gap-3">
+          <select
+            value={resourceType}
+            onChange={e => { setResourceType(e.target.value); setPage(1); }}
+            className="text-sm px-3 py-1.5 border border-slate-200 rounded-lg bg-white"
+          >
+            {RESOURCE_TYPES.map(rt => (
+              <option key={rt.value} value={rt.value}>{rt.label}</option>
+            ))}
+          </select>
+          {pagination && (
+            <span className="text-xs text-slate-400">
+              {pagination.total.toLocaleString()} total entries
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5">
+          <Shield className="w-3.5 h-3.5 text-teal-600" />
+          DPPA §2721 compliance log — every access to driver/vehicle PII is recorded
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        {isLoading ? (
+          <div className="p-6 space-y-2">
+            {Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-8" />)}
+          </div>
+        ) : logs.length === 0 ? (
+          <div className="p-10 text-center">
+            <ScrollText className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+            <div className="text-sm text-slate-400">No audit log entries yet.</div>
+            <div className="text-xs text-slate-300 mt-1">Entries appear when drivers or vehicles are accessed.</div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 border-b border-slate-100">
+                <tr>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500 whitespace-nowrap">Timestamp</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">User</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Role</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Resource</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">ID</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">Action</th>
+                  <th className="text-left px-4 py-2.5 text-xs font-semibold text-slate-500">IP</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {logs.map(log => (
+                  <tr key={log.id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="px-4 py-2 text-xs text-slate-500 whitespace-nowrap font-mono">
+                      {formatTime(log.createdAt)}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-700 max-w-[180px] truncate">
+                      {log.userEmail ?? (
+                        <span className="italic text-amber-600">demo / unauthenticated</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      {log.userRole ? (
+                        <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${
+                          log.userRole === "super_admin" ? "bg-purple-100 text-purple-700" :
+                          log.userRole === "club" ? "bg-blue-100 text-blue-700" :
+                          "bg-teal-100 text-teal-700"
+                        }`}>
+                          {log.userRole === "super_admin" ? "Admin" :
+                           log.userRole === "club" ? "Club" : "Shop"}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-amber-500 italic">demo</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2">
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${resourceBadgeColor(log.resourceType)}`}>
+                        {log.resourceType}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-400 font-mono">
+                      {log.resourceId ?? "—"}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-500 uppercase tracking-wide">
+                      {log.action}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-400 font-mono whitespace-nowrap">
+                      {log.ipAddress ?? "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {pagination && pagination.totalPages > 1 && (
+        <div className="flex items-center justify-between text-sm">
+          <button
+            onClick={() => setPage(p => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" /> Previous
+          </button>
+          <span className="text-xs text-slate-400">
+            Page {pagination.page} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() => setPage(p => Math.min(pagination.totalPages, p + 1))}
+            disabled={page === pagination.totalPages}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium"
+          >
+            Next <ChevronRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
     </div>

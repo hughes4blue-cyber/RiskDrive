@@ -586,6 +586,39 @@ export interface AuthMe {
   user?: AdminUser | null;
 }
 
+export interface AuditLog {
+  id: number;
+  /** @nullable */
+  userId?: string | null;
+  /** @nullable */
+  userEmail?: string | null;
+  /** @nullable */
+  userRole?: string | null;
+  action: string;
+  resourceType: string;
+  /** @nullable */
+  resourceId?: string | null;
+  /** @nullable */
+  ipAddress?: string | null;
+  /** @nullable */
+  userAgent?: string | null;
+  /** @nullable */
+  metadata?: string | null;
+  createdAt: string;
+}
+
+export type AuditLogListPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export interface AuditLogList {
+  data: AuditLog[];
+  pagination: AuditLogListPagination;
+}
+
 export type ApproveUserInputRole = typeof ApproveUserInputRole[keyof typeof ApproveUserInputRole];
 
 
@@ -600,6 +633,13 @@ export interface ApproveUserInput {
   clubId?: number;
   facilityId?: number;
 }
+
+export type ListAuditLogsParams = {
+page?: number;
+limit?: number;
+resourceType?: string;
+userId?: string;
+};
 
 export type ListFacilitiesParams = {
 clubId?: number;

@@ -58,18 +58,18 @@ router.post("/accidents", async (req, res) => {
   }).returning();
 
   const result = await formatAccident(accident);
-  res.status(201).json(result);
+  return res.status(201).json(result);
 });
 
 router.get("/accidents/:accidentId", async (req, res) => {
-  const accidentId = parseInt(req.params.accidentId);
+  const accidentId = parseInt(req.params.accidentId as string);
   const [accident] = await db.select().from(accidentsTable).where(eq(accidentsTable.id, accidentId));
   if (!accident) return res.status(404).json({ error: "Accident not found" });
-  res.json(await formatAccident(accident));
+  return res.json(await formatAccident(accident));
 });
 
 router.post("/accidents/:accidentId/initiate-claim", async (req, res) => {
-  const accidentId = parseInt(req.params.accidentId);
+  const accidentId = parseInt(req.params.accidentId as string);
   const parsed = InitiateClaimBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
 
@@ -79,7 +79,7 @@ router.post("/accidents/:accidentId/initiate-claim", async (req, res) => {
     .returning();
 
   if (!updated) return res.status(404).json({ error: "Accident not found" });
-  res.json(await formatAccident(updated));
+  return res.json(await formatAccident(updated));
 });
 
 export default router;

@@ -9,6 +9,39 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary List audit log entries (super-admin only)
+ */
+export const ListAuditLogsQueryParams = zod.object({
+  "page": zod.coerce.number().optional(),
+  "limit": zod.coerce.number().optional(),
+  "resourceType": zod.coerce.string().optional(),
+  "userId": zod.coerce.string().optional()
+})
+
+export const ListAuditLogsResponse = zod.object({
+  "data": zod.array(zod.object({
+  "id": zod.number(),
+  "userId": zod.string().nullish(),
+  "userEmail": zod.string().nullish(),
+  "userRole": zod.string().nullish(),
+  "action": zod.string(),
+  "resourceType": zod.string(),
+  "resourceId": zod.string().nullish(),
+  "ipAddress": zod.string().nullish(),
+  "userAgent": zod.string().nullish(),
+  "metadata": zod.string().nullish(),
+  "createdAt": zod.string()
+})),
+  "pagination": zod.object({
+  "page": zod.number(),
+  "limit": zod.number(),
+  "total": zod.number(),
+  "totalPages": zod.number()
+})
+})
+
+
+/**
  * @summary Health check
  */
 export const HealthCheckResponse = zod.object({

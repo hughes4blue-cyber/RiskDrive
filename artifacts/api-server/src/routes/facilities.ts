@@ -46,7 +46,7 @@ router.get("/facilities", async (req, res) => {
 });
 
 router.get("/facilities/:facilityId", async (req, res) => {
-  const facilityId = parseInt(req.params.facilityId);
+  const facilityId = parseInt(req.params.facilityId as string);
   const [row] = await db.select({
     facility: facilitiesTable,
     clubName: clubsTable.name,
@@ -56,7 +56,7 @@ router.get("/facilities/:facilityId", async (req, res) => {
 
   if (!row) return res.status(404).json({ error: "Facility not found" });
   const { facility: f, clubName } = row;
-  res.json({
+  return res.json({
     id: f.id, clubId: f.clubId, clubName, name: f.name, address: f.address,
     city: f.city, state: f.state, ownerName: f.ownerName, ownerEmail: f.ownerEmail,
     ownerPhone: f.ownerPhone, riskScore: f.riskScore, riskTier: f.riskTier,
@@ -66,7 +66,7 @@ router.get("/facilities/:facilityId", async (req, res) => {
 });
 
 router.get("/facilities/:facilityId/summary", async (req, res) => {
-  const facilityId = parseInt(req.params.facilityId);
+  const facilityId = parseInt(req.params.facilityId as string);
   const [facility] = await db.select().from(facilitiesTable).where(eq(facilitiesTable.id, facilityId));
   if (!facility) return res.status(404).json({ error: "Facility not found" });
 
@@ -91,7 +91,7 @@ router.get("/facilities/:facilityId/summary", async (req, res) => {
 
   const premiumEstimate = facility.riskScore * 120;
 
-  res.json({
+  return res.json({
     facilityId,
     avgRiskScore: facility.riskScore,
     riskTier: facility.riskTier,

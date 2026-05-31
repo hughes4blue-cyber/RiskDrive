@@ -52,7 +52,7 @@ router.post("/certificates", async (req, res) => {
     fileUrl: data.fileUrl ?? null,
   }).returning();
 
-  res.status(201).json({
+  return res.status(201).json({
     ...cert,
     facilityName: null,
     uploadedAt: cert.uploadedAt?.toISOString() ?? new Date().toISOString(),
@@ -60,14 +60,14 @@ router.post("/certificates", async (req, res) => {
 });
 
 router.get("/certificates/:certificateId", async (req, res) => {
-  const certificateId = parseInt(req.params.certificateId);
+  const certificateId = parseInt(req.params.certificateId as string);
   const [row] = await db.select({ cert: certificatesTable, facilityName: facilitiesTable.name })
     .from(certificatesTable)
     .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id))
     .where(eq(certificatesTable.id, certificateId));
   if (!row) return res.status(404).json({ error: "Certificate not found" });
   const { cert: c, facilityName } = row;
-  res.json({
+  return res.json({
     id: c.id, facilityId: c.facilityId, facilityName,
     policyNumber: c.policyNumber, insurer: c.insurer,
     coverageType: c.coverageType, coverageAmount: c.coverageAmount,

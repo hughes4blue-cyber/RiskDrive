@@ -19,7 +19,7 @@ router.get("/training/modules", async (_req, res) => {
 });
 
 router.get("/training/driver/:driverId", async (req, res) => {
-  const driverId = parseInt(req.params.driverId);
+  const driverId = parseInt(req.params.driverId as string);
   const [driver] = await db.select().from(driversTable).where(eq(driversTable.id, driverId));
   if (!driver) return res.status(404).json({ error: "Driver not found" });
 
@@ -30,7 +30,7 @@ router.get("/training/driver/:driverId", async (req, res) => {
     .where(eq(driverTrainingTable.driverId, driverId))
     .orderBy(desc(driverTrainingTable.assignedAt));
 
-  res.json(assignments.map(({ assignment: a, module: m }) => ({
+  return res.json(assignments.map(({ assignment: a, module: m }) => ({
     id: a.id,
     driverId: a.driverId,
     moduleId: a.moduleId,
@@ -45,7 +45,7 @@ router.get("/training/driver/:driverId", async (req, res) => {
 });
 
 router.post("/training/driver/:driverId/assign", async (req, res) => {
-  const driverId = parseInt(req.params.driverId);
+  const driverId = parseInt(req.params.driverId as string);
   const { moduleId } = req.body as { moduleId: number };
   if (!moduleId) return res.status(400).json({ error: "moduleId required" });
 
@@ -61,7 +61,7 @@ router.post("/training/driver/:driverId/assign", async (req, res) => {
     status: "assigned",
   }).returning();
 
-  res.status(201).json({
+  return res.status(201).json({
     id: assignment.id,
     driverId: assignment.driverId,
     moduleId: assignment.moduleId,
@@ -76,7 +76,7 @@ router.post("/training/driver/:driverId/assign", async (req, res) => {
 });
 
 router.patch("/training/assignment/:assignmentId/complete", async (req, res) => {
-  const assignmentId = parseInt(req.params.assignmentId);
+  const assignmentId = parseInt(req.params.assignmentId as string);
   const { score } = req.body as { score?: number };
 
   const [updated] = await db.update(driverTrainingTable)
@@ -87,7 +87,7 @@ router.patch("/training/assignment/:assignmentId/complete", async (req, res) => 
   if (!updated) return res.status(404).json({ error: "Assignment not found" });
 
   const [mod] = await db.select().from(trainingModulesTable).where(eq(trainingModulesTable.id, updated.moduleId));
-  res.json({
+  return res.json({
     id: updated.id,
     driverId: updated.driverId,
     moduleId: updated.moduleId,
@@ -124,7 +124,7 @@ router.get("/training/assignments", async (req, res) => {
     ? allAssignments.filter(r => driverIds.includes(r.assignment.driverId))
     : allAssignments;
 
-  res.json(filtered.map(({ assignment: a, module: m, driver: d }) => ({
+  return res.json(filtered.map(({ assignment: a, module: m, driver: d }) => ({
     id: a.id,
     driverId: a.driverId,
     driverName: d ? `${d.firstName} ${d.lastName}` : null,
