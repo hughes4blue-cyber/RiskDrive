@@ -7,6 +7,8 @@ import {
   useDenyUser,
   useUpdateAppMode,
   useListAuditLogs,
+  useListClubs,
+  useListFacilities,
   ApproveUserInputRole,
 } from "@workspace/api-client-react";
 import { PageHeader } from "@/components/Layout";
@@ -164,6 +166,96 @@ function ModeTab() {
   );
 }
 
+function PendingUserRow({
+  u,
+  inp,
+  setInput,
+  onApprove,
+  onDeny,
+  approving,
+}: {
+  u: { id: number; email: string; createdAt: string };
+  inp: { role: string; clubId: string; facilityId: string };
+  setInput: (patch: Partial<{ role: string; clubId: string; facilityId: string }>) => void;
+  onApprove: () => void;
+  onDeny: () => void;
+  approving: boolean;
+}) {
+  const { data: clubs } = useListClubs();
+  const { data: facilities } = useListFacilities(
+    inp.role === "shop_owner" ? {} : undefined
+  );
+
+  return (
+    <div className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <div className="font-medium text-slate-900 text-sm">{u.email}</div>
+          <div className="text-xs text-slate-400 mt-0.5">
+            Signed up {new Date(u.createdAt).toLocaleDateString()}
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select
+            value={inp.role}
+            onChange={e => setInput({ role: e.target.value, clubId: "", facilityId: "" })}
+            className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white"
+          >
+            <option value="">Select role…</option>
+            <option value="super_admin">Affinity Risk Admin</option>
+            <option value="club">Club Admin</option>
+            <option value="shop_owner">Shop Owner</option>
+          </select>
+          {inp.role === "club" && (
+            <select
+              value={inp.clubId}
+              onChange={e => setInput({ clubId: e.target.value })}
+              className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white"
+            >
+              <option value="">Select club…</option>
+              {(clubs ?? []).map(c => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
+          {inp.role === "shop_owner" && (
+            <select
+              value={inp.facilityId}
+              onChange={e => setInput({ facilityId: e.target.value })}
+              className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white"
+            >
+              <option value="">Select facility…</option>
+              {(facilities ?? []).map(f => (
+                <option key={f.id} value={String(f.id)}>
+                  {f.name}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            onClick={onApprove}
+            disabled={approving || !inp.role}
+            className="flex items-center gap-1 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
+          >
+            <CheckCircle className="w-3.5 h-3.5" />
+            Approve
+          </button>
+          <button
+            onClick={onDeny}
+            disabled={approving}
+            className="flex items-center gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
+          >
+            <XCircle className="w-3.5 h-3.5" />
+            Deny
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UsersTab() {
   const { data: users, isLoading, refetch } = useListAdminUsers();
   const approve = useApproveUser();
@@ -226,67 +318,17 @@ function UsersTab() {
           <div className="text-sm text-slate-400 py-3">No pending users</div>
         ) : (
           <div className="space-y-3">
-            {pending.map(u => {
-              const inp = getInput(u.id);
-              return (
-                <div key={u.id} className="bg-white border border-amber-200 rounded-xl p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
-                    <div>
-                      <div className="font-medium text-slate-900 text-sm">{u.email}</div>
-                      <div className="text-xs text-slate-400 mt-0.5">
-                        Signed up {new Date(u.createdAt).toLocaleDateString()}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <select
-                        value={inp.role}
-                        onChange={e => setInput(u.id, { role: e.target.value })}
-                        className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg bg-white"
-                      >
-                        <option value="">Select role…</option>
-                        <option value="super_admin">Affinity Risk Admin</option>
-                        <option value="club">Club Admin</option>
-                        <option value="shop_owner">Shop Owner</option>
-                      </select>
-                      {inp.role === "club" && (
-                        <input
-                          type="number"
-                          placeholder="Club ID"
-                          value={inp.clubId}
-                          onChange={e => setInput(u.id, { clubId: e.target.value })}
-                          className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg w-20"
-                        />
-                      )}
-                      {inp.role === "shop_owner" && (
-                        <input
-                          type="number"
-                          placeholder="Facility ID"
-                          value={inp.facilityId}
-                          onChange={e => setInput(u.id, { facilityId: e.target.value })}
-                          className="text-xs px-2 py-1.5 border border-slate-200 rounded-lg w-24"
-                        />
-                      )}
-                      <button
-                        onClick={() => handleApprove(u.id)}
-                        disabled={approving === u.id || !inp.role}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
-                      >
-                        <CheckCircle className="w-3.5 h-3.5" />
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleDeny(u.id)}
-                        disabled={approving === u.id}
-                        className="flex items-center gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg disabled:opacity-50"
-                      >
-                        <XCircle className="w-3.5 h-3.5" />
-                        Deny
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+            {pending.map(u => (
+              <PendingUserRow
+                key={u.id}
+                u={u}
+                inp={getInput(u.id)}
+                setInput={patch => setInput(u.id, patch)}
+                onApprove={() => handleApprove(u.id)}
+                onDeny={() => handleDeny(u.id)}
+                approving={approving === u.id}
+              />
+            ))}
           </div>
         )}
       </div>
