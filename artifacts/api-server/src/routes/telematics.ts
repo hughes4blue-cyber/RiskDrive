@@ -59,9 +59,9 @@ function buildCredentials(input: ReturnType<typeof CreateTelematicsConnectionBod
 
 router.get("/telematics/connections", async (req, res): Promise<void> => {
   const where = scopeWhere(telematicsConnectionsTable.facilityId, req.scopeFacilityIds);
-  const rows = scopeFilter
-    ? await base.where(scopeFilter).orderBy(desc(telematicsEventsTable.timestamp)).limit(limit)
-    : await base.orderBy(desc(telematicsEventsTable.timestamp)).limit(limit);
+  const rows = where
+    ? await db.select().from(telematicsConnectionsTable).where(where).orderBy(desc(telematicsConnectionsTable.createdAt))
+    : await db.select().from(telematicsConnectionsTable).orderBy(desc(telematicsConnectionsTable.createdAt));
   res.json(rows.map(toPublic));
 });
 
@@ -119,22 +119,21 @@ router.post("/telematics/connections", async (req, res): Promise<void> => {
   }
 
   const [row] = await db
-    .select()
-    .from(telematicsConnectionsTable)
-    .where(eq(telematicsConnectionsTable.id, id));
-  if (!row) {
-    res.status(404).json({ error: "Connection not found" });
-    return;
-  }
-  if (!inScope(req.scopeFacilityIds, row.facilityId)) {
-    res.status(403).json({ error: "Access denied" });
-    return;
-  }
-  await db.delete(telematicsConnectionsTable).where(eq(telematicsConnectionsTable.id, id));
-  res.sendStatus(204);
+    .insert(telematicsConnectionsTable)
+    .values({
+      facilityId: input.facilityId,
+      provider: input.provider,
+      status: "connected",
+      encryptedCredentials: encryptSecret(credentials),
+      accountLabel: input.accountLabel ?? null,
+      externalOrgName: orgName,
+    })
+    .returning();
+
+  res.status(201).json(toPublic(row));
 });
 
-router.post("/telematics/connections/:id/sync", async (req, res): Promise<void> => {
+router.delete("/telematics/connections/:id", async (req, res): Promise<void> => {
   const id = parseId(req.params.id);
   const [row] = await db
     .select()

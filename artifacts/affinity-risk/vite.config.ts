@@ -10,17 +10,17 @@ export default defineConfig(async ({ command }) => {
   // PORT is only needed when running the dev/preview server, not during `vite build`.
   const rawPort = process.env.PORT;
   if (!isBuild && !rawPort) {
-    throw new Error("PORT environment variable is required but was not provided.");
+    throw new Error(
+      "PORT environment variable is required but was not provided.",
+    );
   }
   const port = rawPort ? Number(rawPort) : 3000;
   if (!isBuild && (Number.isNaN(port) || port <= 0)) {
     throw new Error(`Invalid PORT value: "${rawPort}"`);
   }
 
-  const basePath = process.env.BASE_PATH;
-  if (!basePath) {
-    throw new Error("BASE_PATH environment variable is required but was not provided.");
-  }
+  // BASE_PATH defaults to '/' when not provided (e.g. outside Replit).
+  const basePath = process.env.BASE_PATH ?? "/";
 
   return {
     base: basePath,
@@ -45,7 +45,12 @@ export default defineConfig(async ({ command }) => {
     resolve: {
       alias: {
         "@": path.resolve(import.meta.dirname, "src"),
-        "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+        "@assets": path.resolve(
+          import.meta.dirname,
+          "..",
+          "..",
+          "attached_assets",
+        ),
       },
       dedupe: ["react", "react-dom"],
     },
