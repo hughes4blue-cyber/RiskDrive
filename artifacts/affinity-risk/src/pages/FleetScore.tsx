@@ -125,11 +125,15 @@ export default function FleetScore() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/facilities").then(r => r.json()),
-      fetch("/api/clubs").then(r => r.json()),
-      fetch("/api/drivers").then(r => r.json()),
-      fetch("/api/onboarding").then(r => r.json()),
-    ]).then(([facilities, clubs, drivers, onboarding]: [Facility[], Club[], Driver[], OnboardingRecord[]]) => {
+      fetch("/api/facilities").then(r => r.json()).catch(() => []),
+      fetch("/api/clubs").then(r => r.json()).catch(() => []),
+      fetch("/api/drivers").then(r => r.json()).catch(() => []),
+      fetch("/api/onboarding").then(r => r.json()).catch(() => []),
+    ]).then(([f, cl, dr, ob]) => {
+      const [facilities, clubs, drivers, onboarding]: [Facility[], Club[], Driver[], OnboardingRecord[]] =
+        [Array.isArray(f) ? f : [], Array.isArray(cl) ? cl : [], Array.isArray(dr) ? dr : [], Array.isArray(ob) ? ob : []];
+      return [facilities, clubs, drivers, onboarding] as [Facility[], Club[], Driver[], OnboardingRecord[]];
+    }).then(([facilities, clubs, drivers, onboarding]: [Facility[], Club[], Driver[], OnboardingRecord[]]) => {
       const clubMap = Object.fromEntries(clubs.map((c: Club) => [c.id, c.name]));
       const computed: FacilityScore[] = facilities.map((f: Facility) => {
         const facDrivers = drivers.filter((d: Driver) => d.facilityId === f.id);

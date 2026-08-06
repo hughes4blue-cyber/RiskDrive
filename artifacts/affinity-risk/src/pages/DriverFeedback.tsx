@@ -52,7 +52,7 @@ export default function DriverFeedback() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch("/api/driver-feedback").then(r => r.json()).then(setItems);
+    fetch("/api/driver-feedback").then(r => r.json()).catch(() => []).then(d => setItems(Array.isArray(d) ? d : []));
   }, []);
 
   async function acknowledge(id: number) {

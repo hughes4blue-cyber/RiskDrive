@@ -46,7 +46,7 @@ export default function Leaderboard() {
   const [view, setView] = useState<"safety" | "training">("safety");
 
   useEffect(() => {
-    fetch("/api/leaderboard").then(r => r.json()).then(setEntries);
+    fetch("/api/leaderboard").then(r => r.json()).catch(() => []).then(d => setEntries(Array.isArray(d) ? d : []));
   }, []);
 
   const filtered = entries?.filter(e => tierFilter === "all" || e.riskTier === tierFilter) ?? [];

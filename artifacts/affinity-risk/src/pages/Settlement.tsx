@@ -45,9 +45,9 @@ export default function Settlement() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/settlements").then(r => r.json()),
-      fetch("/api/settlements/summary").then(r => r.json()),
-    ]).then(([r, s]) => { setRecords(r); setSummary(s); });
+      fetch("/api/settlements").then(r => r.json()).catch(() => []),
+      fetch("/api/settlements/summary").then(r => r.json()).catch(() => null),
+    ]).then(([r, s]) => { setRecords(Array.isArray(r) ? r : []); setSummary(s && !s.error ? s : null); });
   }, []);
 
   const filtered = records?.filter(r => periodFilter === "all" || r.periodMonth === periodFilter) ?? [];

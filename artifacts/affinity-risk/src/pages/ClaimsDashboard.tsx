@@ -98,9 +98,9 @@ export default function ClaimsDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/claims").then(r => r.json()),
-      fetch("/api/claims/summary").then(r => r.json()),
-    ]).then(([c, s]) => { setClaims(c); setSummary(s); });
+      fetch("/api/claims").then(r => r.json()).catch(() => []),
+      fetch("/api/claims/summary").then(r => r.json()).catch(() => null),
+    ]).then(([c, s]) => { setClaims(Array.isArray(c) ? c : []); setSummary(s && !s.error ? s : null); });
   }, []);
 
   const filtered = claims?.filter(c => statusFilter === "all" || c.status === statusFilter) ?? [];

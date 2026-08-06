@@ -65,9 +65,10 @@ export default function Onboarding() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetch("/api/onboarding").then(r => r.json()).then(data => {
-      setChecklists(data);
-      if (data.length > 0 && !selected) setSelected(data[0]);
+    fetch("/api/onboarding").then(r => r.json()).catch(() => []).then(data => {
+      const safe = Array.isArray(data) ? data : [];
+      setChecklists(safe);
+      if (safe.length > 0 && !selected) setSelected(safe[0]);
     });
   }, []);
 

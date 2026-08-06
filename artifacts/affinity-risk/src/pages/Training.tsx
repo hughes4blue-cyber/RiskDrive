@@ -36,11 +36,11 @@ function useTrainingData() {
 
   useState(() => {
     Promise.all([
-      fetch("/api/training/assignments").then(r => r.json()),
-      fetch("/api/training/modules").then(r => r.json()),
+      fetch("/api/training/assignments").then(r => r.json()).catch(() => []),
+      fetch("/api/training/modules").then(r => r.json()).catch(() => []),
     ]).then(([a, m]) => {
-      setAssignments(a);
-      setModules(m);
+      setAssignments(Array.isArray(a) ? a : []);
+      setModules(Array.isArray(m) ? m : []);
       setLoading(false);
     }).catch(() => setLoading(false));
   });
