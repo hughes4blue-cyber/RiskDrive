@@ -4,6 +4,7 @@ import { db, insuranceDocumentsTable, certificatesTable } from "@workspace/db";
 import { CreateInsuranceDocumentBody, ConfirmInsuranceDocumentBody } from "@workspace/api-zod";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { ObjectStorageService } from "../lib/objectStorage";
+import { inScope } from "../lib/scope";
 
 const router = Router();
 const objectStorageService = new ObjectStorageService();
@@ -124,6 +125,13 @@ router.get("/insurance-documents", async (req, res): Promise<void> => {
     res.status(400).json({ error: "facilityId is required" });
     return;
   }
+
+  // Scope check: only allow access to this facility if it's within the user's tenant scope
+  if (!inScope(req.scopeFacilityIds, facilityId)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
   const rows = await db
     .select()
     .from(insuranceDocumentsTable)
@@ -146,6 +154,13 @@ router.post("/insurance-documents", async (req, res): Promise<void> => {
     res.status(400).json({ error: "Invalid request", details: parsed.error.issues });
     return;
   }
+
+  // Scope check: prevent creating documents for out-of-scope facilities
+  if (!inScope(req.scopeFacilityIds, parsed.data.facilityId)) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
   const [row] = await db
     .insert(insuranceDocumentsTable)
     .values({
@@ -176,6 +191,12 @@ router.post("/insurance-documents/:documentId/extract", async (req, res): Promis
 
   if (!doc) {
     res.status(404).json({ error: "Document not found" });
+    return;
+  }
+
+  // Scope check: prevent extracting documents for out-of-scope facilities
+  if (!inScope(req.scopeFacilityIds, doc.facilityId)) {
+    res.status(403).json({ error: "Access denied" });
     return;
   }
 
@@ -239,6 +260,12 @@ router.post("/insurance-documents/:documentId/confirm", async (req, res): Promis
 
   if (!doc) {
     res.status(404).json({ error: "Document not found" });
+    return;
+  }
+
+  // Scope check: prevent confirming documents for out-of-scope facilities
+  if (!inScope(req.scopeFacilityIds, doc.facilityId)) {
+    res.status(403).json({ error: "Access denied" });
     return;
   }
 

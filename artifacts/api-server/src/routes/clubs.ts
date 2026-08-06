@@ -1,12 +1,16 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { clubsTable, facilitiesTable, driversTable, vehiclesTable, accidentsTable, certificatesTable } from "@workspace/db";
-import { eq, avg, count, sql } from "drizzle-orm";
+import { clubsTable, facilitiesTable, accidentsTable, certificatesTable } from "@workspace/db";
+import { eq, inArray } from "drizzle-orm";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
 router.get("/clubs", async (req, res) => {
-  const clubs = await db.select().from(clubsTable);
+  const where = scopeWhere(clubsTable.id, req.scopeClubIds);
+  const clubs = where
+    ? await db.select().from(clubsTable).where(where)
+    : await db.select().from(clubsTable);
   res.json(clubs.map(c => ({
     id: c.id,
     name: c.name,
@@ -23,6 +27,9 @@ router.get("/clubs", async (req, res) => {
 
 router.get("/clubs/:clubId", async (req, res) => {
   const clubId = parseInt(req.params.clubId as string);
+  if (!inScope(req.scopeClubIds, clubId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const [club] = await db.select().from(clubsTable).where(eq(clubsTable.id, clubId));
   if (!club) return res.status(404).json({ error: "Club not found" });
   return res.json({
@@ -33,6 +40,9 @@ router.get("/clubs/:clubId", async (req, res) => {
 
 router.get("/clubs/:clubId/summary", async (req, res) => {
   const clubId = parseInt(req.params.clubId);
+  if (!inScope(req.scopeClubIds, clubId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const facilities = await db.select().from(facilitiesTable).where(eq(facilitiesTable.clubId, clubId));
   const facilityIds = facilities.map(f => f.id);
 
@@ -52,13 +62,13 @@ router.get("/clubs/:clubId/summary", async (req, res) => {
   let openAccidents = 0;
   let certsExpiring = 0;
   if (facilityIds.length > 0) {
-    const accidents = await db.select().from(accidentsTable);
-    openAccidents = accidents.filter(a => facilityIds.includes(a.facilityId) && a.status !== "resolved").length;
-    const certs = await db.select().from(certificatesTable);
-    certsExpiring = certs.filter(c => facilityIds.includes(c.facilityId) && (c.status === "expiring_soon" || c.status === "expired")).length;
+    const accidents = await db.select().from(accidentsTable).where(inArray(accidentsTable.facilityId, facilityIds));
+    openAccidents = accidents.filter(a => a.status !== "resolved").length;
+    const certs = await db.select().from(certificatesTable).where(inArray(certificatesTable.facilityId, facilityIds));
+    certsExpiring = certs.filter(c => c.status === "expiring_soon" || c.status === "expired").length;
   }
 
-  res.json({
+  return res.json({
     clubId,
     totalFacilities: facilities.length,
     totalDrivers,

@@ -4,55 +4,50 @@ import { driversTable, facilitiesTable, telematicsEventsTable } from "@workspace
 import { eq } from "drizzle-orm";
 import { auditAccess } from "../middlewares/audit";
 import { applyDppaDriverMask } from "../lib/dppa";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
+
+function formatDriver(d: typeof driversTable.$inferSelect, facilityName: string | null, req: import("express").Request) {
+  const masked = applyDppaDriverMask(
+    { licenseNumber: d.licenseNumber, phone: d.phone },
+    req.appUser,
+  );
+  return {
+    id: d.id,
+    facilityId: d.facilityId,
+    facilityName,
+    firstName: d.firstName,
+    lastName: d.lastName,
+    licenseNumber: masked.licenseNumber,
+    phone: masked.phone,
+    status: d.status,
+    riskScore: d.riskScore,
+    riskTier: d.riskTier,
+    totalMiles: d.totalMiles,
+    totalTrips: d.totalTrips,
+    hireDate: d.hireDate,
+    createdAt: d.createdAt?.toISOString() ?? new Date().toISOString(),
+  };
+}
 
 router.get(
   "/drivers",
   auditAccess("driver"),
   async (req, res) => {
-    const facilityId = req.query.facilityId
-      ? parseInt(req.query.facilityId as string)
-      : undefined;
+    const where = scopeWhere(driversTable.facilityId, req.scopeFacilityIds);
+    const rows = where
+      ? await db
+          .select({ driver: driversTable, facilityName: facilitiesTable.name })
+          .from(driversTable)
+          .leftJoin(facilitiesTable, eq(driversTable.facilityId, facilitiesTable.id))
+          .where(where)
+      : await db
+          .select({ driver: driversTable, facilityName: facilitiesTable.name })
+          .from(driversTable)
+          .leftJoin(facilitiesTable, eq(driversTable.facilityId, facilitiesTable.id));
 
-    let rows;
-    if (facilityId) {
-      rows = await db
-        .select({ driver: driversTable, facilityName: facilitiesTable.name })
-        .from(driversTable)
-        .leftJoin(facilitiesTable, eq(driversTable.facilityId, facilitiesTable.id))
-        .where(eq(driversTable.facilityId, facilityId));
-    } else {
-      rows = await db
-        .select({ driver: driversTable, facilityName: facilitiesTable.name })
-        .from(driversTable)
-        .leftJoin(facilitiesTable, eq(driversTable.facilityId, facilitiesTable.id));
-    }
-
-    res.json(
-      rows.map(({ driver: d, facilityName }) => {
-        const masked = applyDppaDriverMask(
-          { licenseNumber: d.licenseNumber, phone: d.phone },
-          req.appUser,
-        );
-        return {
-          id: d.id,
-          facilityId: d.facilityId,
-          facilityName,
-          firstName: d.firstName,
-          lastName: d.lastName,
-          licenseNumber: masked.licenseNumber,
-          phone: masked.phone,
-          status: d.status,
-          riskScore: d.riskScore,
-          riskTier: d.riskTier,
-          totalMiles: d.totalMiles,
-          totalTrips: d.totalTrips,
-          hireDate: d.hireDate,
-          createdAt: d.createdAt?.toISOString() ?? new Date().toISOString(),
-        };
-      }),
-    );
+    res.json(rows.map(({ driver: d, facilityName }) => formatDriver(d, facilityName, req)));
   },
 );
 
@@ -69,28 +64,12 @@ router.get(
 
     if (!row) return res.status(404).json({ error: "Driver not found" });
 
-    const { driver: d, facilityName } = row;
-    const masked = applyDppaDriverMask(
-      { licenseNumber: d.licenseNumber, phone: d.phone },
-      req.appUser,
-    );
+    // Ownership check — deny if resource is outside the user's scope
+    if (!inScope(req.scopeFacilityIds, row.driver.facilityId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
 
-    return res.json({
-      id: d.id,
-      facilityId: d.facilityId,
-      facilityName,
-      firstName: d.firstName,
-      lastName: d.lastName,
-      licenseNumber: masked.licenseNumber,
-      phone: masked.phone,
-      status: d.status,
-      riskScore: d.riskScore,
-      riskTier: d.riskTier,
-      totalMiles: d.totalMiles,
-      totalTrips: d.totalTrips,
-      hireDate: d.hireDate,
-      createdAt: d.createdAt?.toISOString() ?? new Date().toISOString(),
-    });
+    return res.json(formatDriver(row.driver, row.facilityName, req));
   },
 );
 
@@ -105,6 +84,10 @@ router.get(
       .where(eq(driversTable.id, driverId));
 
     if (!driver) return res.status(404).json({ error: "Driver not found" });
+
+    if (!inScope(req.scopeFacilityIds, driver.facilityId)) {
+      return res.status(403).json({ error: "Access denied" });
+    }
 
     const events = await db
       .select()

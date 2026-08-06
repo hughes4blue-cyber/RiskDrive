@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { requireLiveMode, injectScopeParams } from "../middlewares/auth";
+import { requireLiveMode, resolveScope } from "../middlewares/auth";
 import healthRouter from "./health";
 import authRouter from "./auth";
 import clubsRouter from "./clubs";
@@ -16,6 +16,7 @@ import claimsRouter from "./claims";
 import settlementsRouter from "./settlements";
 import onboardingRouter from "./onboarding";
 import telematicsRouter from "./telematics";
+import telematicsWebhookRouter from "./telematics_webhook";
 import auditRouter from "./audit";
 import storageRouter from "./storage";
 import insuranceDocumentsRouter from "./insurance_documents";
@@ -26,9 +27,13 @@ const router: IRouter = Router();
 router.use(healthRouter);
 router.use(authRouter);
 
+// Inbound webhooks — authenticated via HMAC, not Clerk sessions.
+// Must be mounted BEFORE requireLiveMode.
+router.use(telematicsWebhookRouter);
+
 // All data routes: require live-mode auth when mode=live, then inject scope
 router.use(requireLiveMode);
-router.use(injectScopeParams);
+router.use(resolveScope);
 
 router.use(clubsRouter);
 router.use(facilitiesRouter);

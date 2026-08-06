@@ -40,7 +40,7 @@ const CHECKLIST_ITEMS: { key: keyof Checklist; label: string; description: strin
   { key: "backgroundChecksPassed", label: "Background Checks Passed", description: "MVR and criminal background checks cleared for all drivers", category: "Compliance" },
   { key: "vehicleInspectionComplete", label: "Vehicle Inspection Complete", description: "All tow vehicles inspected and meet FMCSA standards", category: "Operations" },
   { key: "telematicsAgreementSigned", label: "Telematics Agreement Signed", description: "Hauler consented to telematics data sharing for insurance", category: "Telematics" },
-  { key: "telematicsDeviceInstalled", label: "Telematics Device Installed", description: "Affinity RiskDrive-compatible device installed in all vehicles", category: "Telematics" },
+  { key: "telematicsDeviceInstalled", label: "Telematics Device Installed", description: "Affinity RiskDrive™-compatible device installed in all vehicles", category: "Telematics" },
 ];
 
 const STATUS_CFG: Record<string, { label: string; className: string; dot: string }> = {

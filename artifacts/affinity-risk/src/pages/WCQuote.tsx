@@ -427,7 +427,7 @@ export default function WCQuote() {
 
                     {form.hasExistingTelematics && (
                       <div className="space-y-4">
-                        <Field label="Telematics Provider Name" hint="e.g. Samsara, Verizon Connect, Motive, Geotab, RiskDrive">
+                        <Field label="Telematics Provider Name" hint="e.g. Samsara, Verizon Connect, Motive, Geotab, RiskDrive™">
                           <Input value={form.telematicsProvider} onChange={v => set("telematicsProvider", v)} placeholder="e.g. Samsara" />
                         </Field>
                         <div className="flex gap-2.5 bg-blue-50 border border-blue-200 rounded-xl p-4">
@@ -444,7 +444,7 @@ export default function WCQuote() {
                         <div className="flex gap-2.5 bg-orange-50 border border-orange-200 rounded-xl p-4">
                           <AlertCircle className="w-4 h-4 text-orange-500 flex-shrink-0 mt-0.5" />
                           <div className="text-sm text-orange-900">
-                            Telematics is the backbone of the <strong>RiskDrive Liability platform</strong>. Operators who add telematics unlock real-time driver scoring, incident exoneration data, and future liability premium credits.
+                            Telematics is the backbone of the <strong>RiskDrive™ Liability platform</strong>. Operators who add telematics unlock real-time driver scoring, incident exoneration data, and future liability premium credits.
                           </div>
                         </div>
                         <label className="flex items-start gap-3 p-4 rounded-xl border border-gray-200 bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors">

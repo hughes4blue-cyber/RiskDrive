@@ -120,7 +120,7 @@ export default function DriverFeedback() {
         {/* How it works banner */}
         <div className="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 text-xs text-blue-800 flex items-center gap-3">
           <Bell className="w-4 h-4 flex-shrink-0 text-blue-600" />
-          <span>Affinity RiskDrive analyzes telematics events in real time and sends in-cab or mobile alerts to drivers within seconds of a detected behavior. Alerts are logged here for fleet manager review and acknowledgement.</span>
+          <span>Affinity RiskDrive™ analyzes telematics events in real time and sends in-cab or mobile alerts to drivers within seconds of a detected behavior. Alerts are logged here for fleet manager review and acknowledgement.</span>
         </div>
 
         {/* Filters */}

@@ -1,7 +1,7 @@
 import { getAuth } from "@clerk/express";
 import type { Request, Response, NextFunction } from "express";
 import { db } from "@workspace/db";
-import { usersTable, appSettingsTable } from "@workspace/db";
+import { usersTable, appSettingsTable, facilitiesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const ADMIN_EMAIL = "ahughes@affinityrisk.com";
@@ -69,6 +69,20 @@ declare global {
   namespace Express {
     interface Request {
       appUser?: typeof usersTable.$inferSelect;
+      /**
+       * Resolved tenant scope:
+       *   null  = no restriction (demo mode, super_admin)
+       *   []    = no facility access (unassigned role)
+       *   [...]  = exactly these facility IDs are visible
+       */
+      scopeFacilityIds?: number[] | null;
+      /**
+       * Club-level scope (mirrors scopeFacilityIds but for the clubs list):
+       *   null  = no restriction
+       *   []    = no club access
+       *   [...]  = exactly these club IDs are visible
+       */
+      scopeClubIds?: number[] | null;
     }
   }
 }
@@ -133,24 +147,56 @@ export function requireSuperAdmin(
   next();
 }
 
-// ── injectScopeParams — narrows list queries by the user's role ──────
+// ── resolveScope — resolves tenant boundaries for every data route ────
 // Must run AFTER requireLiveMode (req.appUser set only in Live mode).
-// In Demo mode req.appUser is undefined → no-op, all data visible.
-export function injectScopeParams(
+// In Demo mode req.appUser is undefined → null scope (all data visible).
+//
+// super_admin : scopeFacilityIds=null, scopeClubIds=null  (unrestricted)
+// club        : scopeFacilityIds = all facilities in user.clubId
+//               scopeClubIds    = [user.clubId]
+// shop_owner  : scopeFacilityIds = [user.facilityId]
+//               scopeClubIds    = [club of that facility]
+// unknown     : scopeFacilityIds=[], scopeClubIds=[]  (no access)
+export async function resolveScope(
   req: Request,
   _res: Response,
   next: NextFunction,
-): void {
+): Promise<void> {
   const user = req.appUser;
-  if (!user) {
+
+  // Demo mode (no appUser) or super_admin: unrestricted
+  if (!user || user.role === "super_admin") {
+    req.scopeFacilityIds = null;
+    req.scopeClubIds = null;
     next();
     return;
   }
-  if (user.role === "shop_owner" && user.facilityId != null) {
-    req.query = { ...req.query, facilityId: String(user.facilityId) };
-  } else if (user.role === "club" && user.clubId != null) {
-    req.query = { ...req.query, clubId: String(user.clubId) };
+
+  if (user.role === "club" && user.clubId != null) {
+    const rows = await db
+      .select({ id: facilitiesTable.id })
+      .from(facilitiesTable)
+      .where(eq(facilitiesTable.clubId, user.clubId));
+    req.scopeFacilityIds = rows.map((r) => r.id);
+    req.scopeClubIds = [user.clubId];
+    next();
+    return;
   }
-  // super_admin: no filtering
+
+  if (user.role === "shop_owner" && user.facilityId != null) {
+    const [fac] = await db
+      .select({ clubId: facilitiesTable.clubId })
+      .from(facilitiesTable)
+      .where(eq(facilitiesTable.id, user.facilityId))
+      .limit(1);
+    req.scopeFacilityIds = [user.facilityId];
+    req.scopeClubIds = fac ? [fac.clubId] : [];
+    next();
+    return;
+  }
+
+  // Unassigned role or missing IDs — deny access to all data
+  req.scopeFacilityIds = [];
+  req.scopeClubIds = [];
   next();
 }

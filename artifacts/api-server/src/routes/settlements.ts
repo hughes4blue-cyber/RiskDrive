@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { settlementRecordsTable, facilitiesTable, clubsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
+import { scopeWhere } from "../lib/scope";
 
 const router = Router();
 
@@ -27,17 +28,21 @@ async function formatRecord(r: typeof settlementRecordsTable.$inferSelect) {
 }
 
 router.get("/settlements", async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
   const periodMonth = req.query.periodMonth as string | undefined;
-  let rows = await db.select().from(settlementRecordsTable).orderBy(desc(settlementRecordsTable.periodMonth));
-  if (facilityId) rows = rows.filter(r => r.facilityId === facilityId);
+  const where = scopeWhere(settlementRecordsTable.facilityId, req.scopeFacilityIds);
+  let rows = where
+    ? await db.select().from(settlementRecordsTable).where(where).orderBy(desc(settlementRecordsTable.periodMonth))
+    : await db.select().from(settlementRecordsTable).orderBy(desc(settlementRecordsTable.periodMonth));
   if (periodMonth) rows = rows.filter(r => r.periodMonth === periodMonth);
   const result = await Promise.all(rows.map(formatRecord));
   res.json(result);
 });
 
-router.get("/settlements/summary", async (_req, res) => {
-  const rows = await db.select().from(settlementRecordsTable);
+router.get("/settlements/summary", async (req, res) => {
+  const where = scopeWhere(settlementRecordsTable.facilityId, req.scopeFacilityIds);
+  const rows = where
+    ? await db.select().from(settlementRecordsTable).where(where)
+    : await db.select().from(settlementRecordsTable);
   const totalGross = rows.reduce((s, r) => s + r.grossSettlement, 0);
   const totalPremium = rows.reduce((s, r) => s + r.insurancePremiumDeduction, 0);
   const totalNet = rows.reduce((s, r) => s + r.netPayout, 0);

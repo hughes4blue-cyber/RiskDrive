@@ -136,7 +136,7 @@ export default function DriverDetail({ params }: { params: { driverId: string } 
             </div>
             <div className="mt-3 pt-3 border-t border-border text-xs text-muted-foreground flex items-center gap-1.5">
               <ShieldCheck className="w-3 h-3 text-primary" />
-              Continuous MVR monitoring active — violations and CDL status changes trigger automatic alerts via Affinity RiskDrive.
+              Continuous MVR monitoring active — violations and CDL status changes trigger automatic alerts via Affinity RiskDrive™.
             </div>
           </div>
         )}

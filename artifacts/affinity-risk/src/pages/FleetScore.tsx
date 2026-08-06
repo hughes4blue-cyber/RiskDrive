@@ -193,8 +193,8 @@ export default function FleetScore() {
             <div>
               <div className="text-sm font-bold text-primary mb-1">How Affinity RiskDrive™ Translates to Insurance Outcomes</div>
               <p className="text-xs text-muted-foreground leading-relaxed max-w-3xl">
-                Affinity RiskDrive acts as an independent analytics layer between your fleet technology and insurance markets.
-                The composite RiskDrive Score summarizes safety, compliance, telematics adoption, and training performance into a
+                Affinity RiskDrive™ acts as an independent analytics layer between your fleet technology and insurance markets.
+                The composite RiskDrive™ Score summarizes safety, compliance, telematics adoption, and training performance into a
                 single signal underwriters can trust — expanding carrier accessibility, right-sizing premiums, and reducing
                 your total cost of risk (TCOR). Affinity Risk, as your specialty broker, takes this score to market
                 on your behalf to access more carriers and negotiate better terms.

@@ -3,22 +3,20 @@ import { db } from "@workspace/db";
 import { certificatesTable, facilitiesTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { UploadCertificateBody } from "@workspace/api-zod";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
 router.get("/certificates", async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
-  let rows;
-  if (facilityId) {
-    rows = await db.select({ cert: certificatesTable, facilityName: facilitiesTable.name })
-      .from(certificatesTable)
-      .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id))
-      .where(eq(certificatesTable.facilityId, facilityId));
-  } else {
-    rows = await db.select({ cert: certificatesTable, facilityName: facilitiesTable.name })
-      .from(certificatesTable)
-      .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id));
-  }
+  const where = scopeWhere(certificatesTable.facilityId, req.scopeFacilityIds);
+  const rows = where
+    ? await db.select({ cert: certificatesTable, facilityName: facilitiesTable.name })
+        .from(certificatesTable)
+        .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id))
+        .where(where)
+    : await db.select({ cert: certificatesTable, facilityName: facilitiesTable.name })
+        .from(certificatesTable)
+        .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id));
 
   res.json(rows.map(({ cert: c, facilityName }) => ({
     id: c.id, facilityId: c.facilityId, facilityName,
@@ -34,6 +32,10 @@ router.post("/certificates", async (req, res) => {
   const parsed = UploadCertificateBody.safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: "Invalid input" });
   const data = parsed.data;
+
+  if (!inScope(req.scopeFacilityIds, data.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const now = new Date();
   const expDate = new Date(data.expirationDate);
@@ -66,6 +68,9 @@ router.get("/certificates/:certificateId", async (req, res) => {
     .leftJoin(facilitiesTable, eq(certificatesTable.facilityId, facilitiesTable.id))
     .where(eq(certificatesTable.id, certificateId));
   if (!row) return res.status(404).json({ error: "Certificate not found" });
+  if (!inScope(req.scopeFacilityIds, row.cert.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const { cert: c, facilityName } = row;
   return res.json({
     id: c.id, facilityId: c.facilityId, facilityName,

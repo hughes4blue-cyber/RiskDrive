@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { ClerkProvider, useUser, useClerk } from "@clerk/react";
 import { publishableKeyFromHost } from "@clerk/react/internal";
 import { shadcn } from "@clerk/themes";
-import { Switch, Route, useLocation, Router as WouterRouter } from "wouter";
+import { Switch, Route, Redirect, useLocation, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -139,13 +139,19 @@ function ClerkQueryClientCacheInvalidator() {
 }
 
 /* ── Auth-aware layout guard ─────────────────────────────────────────
-   In Live mode, a signed-in user who is still pending approval sees
-   the waiting screen instead of the main app. In Demo mode (or while
-   mode/user is loading) everything passes through normally. */
+   In Live mode, unauthenticated visitors are sent to the sign-in page.
+   Signed-in users who are still pending approval see a waiting screen.
+   In Demo mode everything passes through normally. */
 function AuthGate() {
   const { isSignedIn, isLoaded } = useUser();
   const { data: meData } = useGetCurrentUser();
 
+  // Live mode + not signed in → redirect to sign-in
+  if (isLoaded && !isSignedIn && meData?.mode === "live") {
+    return <Redirect to="/sign-in" />;
+  }
+
+  // Live mode + pending approval
   if (
     isLoaded &&
     isSignedIn &&
@@ -217,7 +223,7 @@ function ClerkProviderWithRoutes() {
       localization={{
         signIn: {
           start: {
-            title: "Welcome to RiskDrive",
+            title: "Welcome to RiskDrive™",
             subtitle: "Sign in to your Affinity Risk Solutions account",
           },
         },

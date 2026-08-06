@@ -73,7 +73,7 @@ export default function Home() {
                   href="/fleet-score"
                   className="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
                 >
-                  View RiskDrive Score <ChevronRight className="w-3.5 h-3.5" />
+                  View RiskDrive™ Score <ChevronRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
 
@@ -149,7 +149,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── How RiskDrive Works — replaces duplicate stats strip ── */}
+      {/* ── How RiskDrive™ Works — replaces duplicate stats strip ── */}
       <section className="bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-6 py-8">
           <div className="text-center mb-6">
@@ -162,14 +162,14 @@ export default function Home() {
                 icon: Satellite,
                 step: "01",
                 title: "Connect your telematics",
-                desc: "Paste your Samsara or Geotab API credentials. RiskDrive validates and pulls live vehicle, driver, and safety-event data in minutes.",
+                desc: "Paste your Samsara or Geotab API credentials. RiskDrive™ validates and pulls live vehicle, driver, and safety-event data in minutes.",
                 accent: "#E97132",
                 href: "/connect-telematics",
               },
               {
                 icon: BarChart3,
                 step: "02",
-                title: "Get your RiskDrive Score",
+                title: "Get your RiskDrive™ Score",
                 desc: "Composite scoring across Safety (40%), Compliance (30%), Telematics (20%), and Training (10%). Score 70+ unlocks preferred carrier markets.",
                 accent: "#0D3D56",
                 href: "/fleet-score",
@@ -294,7 +294,7 @@ export default function Home() {
             </div>
             <div>
               <div className="text-white font-bold text-sm">Ask Finn</div>
-              <div className="text-orange-100 text-[10px]">RiskDrive AI Guide</div>
+              <div className="text-orange-100 text-[10px]">RiskDrive™ AI Guide</div>
             </div>
             <Link href="/finn" className="ml-auto text-[10px] text-orange-100 hover:text-white flex items-center gap-0.5">
               Full chat <ChevronRight className="w-3 h-3" />
@@ -306,7 +306,7 @@ export default function Home() {
         {/* Quick navigation tiles */}
         <div className="lg:col-span-3 grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { href: "/fleet-score", icon: BarChart3, label: "RiskDrive Score", desc: "Composite scores per operator", accent: "#0D3D56" },
+            { href: "/fleet-score", icon: BarChart3, label: "RiskDrive™ Score", desc: "Composite scores per operator", accent: "#0D3D56" },
             { href: "/claims", icon: Scale, label: "Claims TPA", desc: "Open FNOL & pipeline", accent: "#DC2626" },
             { href: "/drivers", icon: Users, label: "Drivers", desc: "Scorecards & telematics", accent: "#7C3AED" },
             { href: "/policies", icon: FileText, label: "Liability Placement", desc: "Submission pipeline", accent: "#0891B2" },
@@ -378,16 +378,16 @@ export default function Home() {
 /* Finn inline mini-chat */
 function FinnInline() {
   const [msgs, setMsgs] = useState<{ r: "finn" | "user"; t: string }[]>([
-    { r: "finn", t: "Hi! Ask me anything about WC quotes, your RiskDrive score, or 1099 compliance." },
+    { r: "finn", t: "Hi! Ask me anything about WC quotes, your RiskDrive™ score, or 1099 compliance." },
   ]);
   const [input, setInput] = useState("");
 
   const KB: { kw: string[]; t: string }[] = [
     { kw: ["wc", "workers comp", "quote"], t: "Head to the WC Quote page to start an AmTrust application. After your policy binds, your WC data preloads into your telematics platform via API." },
-    { kw: ["score", "riskdrive"], t: "Your RiskDrive Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred markets." },
-    { kw: ["1099", "contractor"], t: "RiskDrive scores each 1099 operator individually. That data is for insurance rating only — never used to control schedules." },
+    { kw: ["score", "riskdrive"], t: "Your RiskDrive™ Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred markets." },
+    { kw: ["1099", "contractor"], t: "RiskDrive™ scores each 1099 operator individually. That data is for insurance rating only — never used to control schedules." },
   ];
-  const fallback = "I can help with WC quotes, RiskDrive scores, 1099 compliance, claims, and carrier access. What do you need?";
+  const fallback = "I can help with WC quotes, RiskDrive™ scores, 1099 compliance, claims, and carrier access. What do you need?";
 
   function send() {
     const t = input.trim();

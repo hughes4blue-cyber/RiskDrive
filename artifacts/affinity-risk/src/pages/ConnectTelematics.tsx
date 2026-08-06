@@ -169,7 +169,7 @@ export default function ConnectTelematics() {
     <div>
       <PageHeader
         title="Connect Telematics"
-        subtitle="Link Samsara or Geotab to stream live fleet data into RiskDrive"
+        subtitle="Link Samsara or Geotab to stream live fleet data into RiskDrive™"
       />
       <div className="p-6 space-y-6">
 
@@ -184,7 +184,7 @@ export default function ConnectTelematics() {
           <div className="space-y-1 text-sm flex-1">
             <p className="font-bold text-white">Real provider integration — not a data scraper</p>
             <p className="text-slate-400 leading-relaxed text-xs">
-              RiskDrive connects directly to your existing telematics account via the provider's official API.
+              RiskDrive™ connects directly to your existing telematics account via the provider's official API.
               Credentials are validated live and stored AES-256 encrypted. Sync pulls vehicles, drivers, and
               safety events and keeps them in sync. This is the API bridge that preloads bound Workers Comp
               data into the operator's platform.

@@ -1,28 +1,23 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { facilitiesTable, clubsTable, telematicsEventsTable, driversTable, vehiclesTable, accidentsTable } from "@workspace/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
 router.get("/facilities", async (req, res) => {
-  const clubId = req.query.clubId ? parseInt(req.query.clubId as string) : undefined;
-
-  let facilities;
-  if (clubId) {
-    facilities = await db.select({
-      facility: facilitiesTable,
-      clubName: clubsTable.name,
-    }).from(facilitiesTable)
-      .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id))
-      .where(eq(facilitiesTable.clubId, clubId));
-  } else {
-    facilities = await db.select({
-      facility: facilitiesTable,
-      clubName: clubsTable.name,
-    }).from(facilitiesTable)
-      .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id));
-  }
+  // scopeFacilityIds scopes to specific facilities (shop_owner: own facility;
+  // club: all in their club; super_admin/demo: null = all)
+  const where = scopeWhere(facilitiesTable.id, req.scopeFacilityIds);
+  const facilities = where
+    ? await db.select({ facility: facilitiesTable, clubName: clubsTable.name })
+        .from(facilitiesTable)
+        .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id))
+        .where(where)
+    : await db.select({ facility: facilitiesTable, clubName: clubsTable.name })
+        .from(facilitiesTable)
+        .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id));
 
   res.json(facilities.map(({ facility: f, clubName }) => ({
     id: f.id,
@@ -47,6 +42,9 @@ router.get("/facilities", async (req, res) => {
 
 router.get("/facilities/:facilityId", async (req, res) => {
   const facilityId = parseInt(req.params.facilityId as string);
+  if (!inScope(req.scopeFacilityIds, facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const [row] = await db.select({
     facility: facilitiesTable,
     clubName: clubsTable.name,
@@ -67,6 +65,9 @@ router.get("/facilities/:facilityId", async (req, res) => {
 
 router.get("/facilities/:facilityId/summary", async (req, res) => {
   const facilityId = parseInt(req.params.facilityId as string);
+  if (!inScope(req.scopeFacilityIds, facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const [facility] = await db.select().from(facilitiesTable).where(eq(facilitiesTable.id, facilityId));
   if (!facility) return res.status(404).json({ error: "Facility not found" });
 
@@ -74,8 +75,8 @@ router.get("/facilities/:facilityId/summary", async (req, res) => {
   const vehicles = await db.select().from(vehiclesTable).where(eq(vehiclesTable.facilityId, facilityId));
   const vehicleIds = vehicles.map(v => v.id);
 
-  let totalMiles = vehicles.reduce((s, v) => s + (v.totalMiles ?? 0), 0);
-  let activeVehicles = vehicles.filter(v => v.status === "active").length;
+  const totalMiles = vehicles.reduce((s, v) => s + (v.totalMiles ?? 0), 0);
+  const activeVehicles = vehicles.filter(v => v.status === "active").length;
 
   let hardBraking = 0, harshAccel = 0, speeding = 0;
   if (vehicleIds.length > 0) {
@@ -88,7 +89,6 @@ router.get("/facilities/:facilityId/summary", async (req, res) => {
 
   const accidents = await db.select().from(accidentsTable).where(eq(accidentsTable.facilityId, facilityId));
   const openAccidents = accidents.filter(a => a.status !== "resolved").length;
-
   const premiumEstimate = facility.riskScore * 120;
 
   return res.json({

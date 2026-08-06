@@ -1,8 +1,8 @@
-import { Link } from "wouter";
+import { Link, Redirect } from "wouter";
 import { AlertTriangle, ChevronRight, TrendingDown } from "lucide-react";
 import {
   useGetDashboardOverview, useGetRiskDistribution, useGetRecentAccidents,
-  useGetTopRiskDrivers, useGetTelematicsActivity
+  useGetTopRiskDrive™rs, useGetTelematicsActivity, useGetCurrentUser,
 } from "@workspace/api-client-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid
@@ -215,14 +215,25 @@ function SeverityBadge({ severity }: { severity: string }) {
 
 /* ── Dashboard ───────────────────────────────────────────────────── */
 export default function Dashboard() {
+  // All hooks must be at the top — no hooks after conditional returns
+  const { data: meData } = useGetCurrentUser();
   const { data: overview, isLoading: ovLoading } = useGetDashboardOverview();
   const { data: distribution, isLoading: distLoading } = useGetRiskDistribution();
   const { data: accidents, isLoading: accLoading } = useGetRecentAccidents();
-  const { data: topDrivers, isLoading: drLoading } = useGetTopRiskDrivers();
+  const { data: topDrivers, isLoading: drLoading } = useGetTopRiskDrive™rs();
   const { data: activity, isLoading: actLoading } = useGetTelematicsActivity();
 
+  const appUser = meData?.user;
   const activitySlice = activity?.slice(-14) ?? [];
   const avgScore = overview?.avgPlatformRiskScore ?? 0;
+
+  // Role-based home: shop owners and club admins see only their scoped page
+  if (appUser?.role === "shop_owner" && appUser.facilityId) {
+    return <Redirect to={`/facilities/${appUser.facilityId}`} />;
+  }
+  if (appUser?.role === "club" && appUser.clubId) {
+    return <Redirect to={`/clubs/${appUser.clubId}`} />;
+  }
 
   return (
     <div>
@@ -240,7 +251,7 @@ export default function Dashboard() {
           distLoading={distLoading}
         />
 
-        {/* RiskDrive Value Banner — bolder */}
+        {/* RiskDrive™ Value Banner — bolder */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-0 rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-white">
           {[
             { label: "Carrier Markets Accessible", value: "8", sub: "Competing for AAA network business", color: "#0F2940", bg: "#0F294008" },

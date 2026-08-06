@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { driversTable, facilitiesTable, vehiclesTable, telematicsEventsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { inScope } from "../lib/scope";
 
 const router = Router();
 
@@ -27,6 +28,9 @@ function buildFactors(events: { eventType: string }[]): Array<{ name: string; im
 
 router.get("/risk/facility/:facilityId", async (req, res) => {
   const facilityId = parseInt(req.params.facilityId as string);
+  if (!inScope(req.scopeFacilityIds, facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const [facility] = await db.select().from(facilitiesTable).where(eq(facilitiesTable.id, facilityId));
   if (!facility) return res.status(404).json({ error: "Facility not found" });
 
@@ -49,6 +53,9 @@ router.get("/risk/driver/:driverId", async (req, res) => {
   const driverId = parseInt(req.params.driverId as string);
   const [driver] = await db.select().from(driversTable).where(eq(driversTable.id, driverId));
   if (!driver) return res.status(404).json({ error: "Driver not found" });
+  if (!inScope(req.scopeFacilityIds, driver.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const events = await db.select().from(telematicsEventsTable).where(eq(telematicsEventsTable.driverId, driverId));
 
@@ -67,6 +74,9 @@ router.get("/risk/vehicle/:vehicleId", async (req, res) => {
   const vehicleId = parseInt(req.params.vehicleId as string);
   const [vehicle] = await db.select().from(vehiclesTable).where(eq(vehiclesTable.id, vehicleId));
   if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
+  if (!inScope(req.scopeFacilityIds, vehicle.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const events = await db.select().from(telematicsEventsTable).where(eq(telematicsEventsTable.vehicleId, vehicleId));
 
@@ -85,6 +95,9 @@ router.get("/risk/suggestions/:driverId", async (req, res) => {
   const driverId = parseInt(req.params.driverId as string);
   const [driver] = await db.select().from(driversTable).where(eq(driversTable.id, driverId));
   if (!driver) return res.status(404).json({ error: "Driver not found" });
+  if (!inScope(req.scopeFacilityIds, driver.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const events = await db.select().from(telematicsEventsTable).where(eq(telematicsEventsTable.driverId, driverId));
 

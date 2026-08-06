@@ -17,7 +17,7 @@ const NAV = [
     label: "Overview",
     items: [
       { icon: LayoutDashboard, label: "Portal Home", href: "/" },
-      { icon: BarChart3, label: "RiskDrive Score", href: "/fleet-score" },
+      { icon: BarChart3, label: "RiskDrive™ Score", href: "/fleet-score" },
     ],
   },
   {
@@ -137,7 +137,7 @@ function SidebarAuthSection() {
             className="flex items-center gap-2 p-2 rounded-lg bg-white/8 text-slate-400 hover:text-white hover:bg-white/12 transition-colors"
           >
             <LogIn className="w-3.5 h-3.5" />
-            <span className="text-[11px] font-medium">Sign in to RiskDrive</span>
+            <span className="text-[11px] font-medium">Sign in to RiskDrive™</span>
           </Link>
         )
       )}
@@ -172,7 +172,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             style={{ filter: "brightness(0) invert(1)", objectFit: "contain" }}
           />
           <div className="leading-tight min-w-0">
-            <div className="text-white font-extrabold text-sm tracking-tight">RiskDrive</div>
+            <div className="text-white font-extrabold text-sm tracking-tight">RiskDrive™</div>
             <div className="text-slate-400 text-[11px] font-medium">by Affinity Risk</div>
           </div>
           <button
@@ -284,12 +284,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
           </button>
 
           <Link href="/" className="md:hidden flex items-center gap-2">
-            <span className="font-bold text-slate-900 text-sm">RiskDrive</span>
+            <span className="font-bold text-slate-900 text-sm">RiskDrive™</span>
           </Link>
 
           <div className="hidden md:flex items-center gap-2 text-xs text-slate-500">
             <Link href="/" className="hover:text-orange-500 font-semibold text-slate-700 transition-colors">
-              RiskDrive
+              RiskDrive™
             </Link>
             {location !== "/" && (
               <>
@@ -323,7 +323,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4 text-xs text-slate-400">
             <Link href="/finn" className="hover:text-orange-500 transition-colors">Ask Finn</Link>
             <Link href="/wc-quote" className="hover:text-orange-500 transition-colors">WC Quote</Link>
-            <Link href="/fleet-score" className="hover:text-orange-500 transition-colors">RiskDrive Score</Link>
+            <Link href="/fleet-score" className="hover:text-orange-500 transition-colors">RiskDrive™ Score</Link>
           </div>
         </footer>
       </div>
@@ -336,12 +336,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 /* ── Finn corner widget ──────────────────────────────────────────── */
 
 const FINN_KB: { kw: string[]; reply: string }[] = [
-  { kw: ["workers comp", "wc", "work comp"], reply: "WC for tow operators is rated on actual payroll — not guesses. Your RiskDrive telematics data gives underwriters a real picture. Operators with clean data save 8–22% vs. standard market. Head to WC Quote and I'll help pre-fill it." },
-  { kw: ["score", "riskdrive"], reply: "Your RiskDrive Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred carrier markets and lower tier premiums. Want tips to improve fastest?" },
-  { kw: ["1099", "contractor", "w2"], reply: "Affinity RiskDrive scores each contractor independently. Data is used for insurance rating only — never to direct work schedules or assign jobs, which would risk W2 reclassification." },
-  { kw: ["claim", "accident", "exonerat"], reply: "On any incident, RiskDrive immediately secures telematics data and dashcam clips. This evidence packet is the difference between a $74K claim and a $0 exoneration. Our network exoneration rate is 25%." },
+  { kw: ["workers comp", "wc", "work comp"], reply: "WC for tow operators is rated on actual payroll — not guesses. Your RiskDrive™ telematics data gives underwriters a real picture. Operators with clean data save 8–22% vs. standard market. Head to WC Quote and I'll help pre-fill it." },
+  { kw: ["score", "riskdrive"], reply: "Your RiskDrive™ Score = Safety (40%) + Compliance (30%) + Telematics (20%) + Training (10%). Score 70+ unlocks preferred carrier markets and lower tier premiums. Want tips to improve fastest?" },
+  { kw: ["1099", "contractor", "w2"], reply: "Affinity RiskDrive™ scores each contractor independently. Data is used for insurance rating only — never to direct work schedules or assign jobs, which would risk W2 reclassification." },
+  { kw: ["claim", "accident", "exonerat"], reply: "On any incident, RiskDrive™ immediately secures telematics data and dashcam clips. This evidence packet is the difference between a $74K claim and a $0 exoneration. Our network exoneration rate is 25%." },
 ];
-const FINN_DEFAULT = "I help tow operators and AAA clubs with WC quotes, RiskDrive scores, 1099 compliance, and claims. What do you need?";
+const FINN_DEFAULT = "I help tow operators and AAA clubs with WC quotes, RiskDrive™ scores, 1099 compliance, and claims. What do you need?";
 function finnReply(t: string) {
   const l = t.toLowerCase();
   return FINN_KB.find((e) => e.kw.some((k) => l.includes(k)))?.reply ?? FINN_DEFAULT;
@@ -351,7 +351,7 @@ function FinnWidget() {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [msgs, setMsgs] = useState<{ r: "finn" | "user"; t: string }[]>([
-    { r: "finn", t: "Hi! I'm Finn — your Affinity Risk AI guide. Ask me about WC quotes, your RiskDrive score, or 1099 compliance." },
+    { r: "finn", t: "Hi! I'm Finn — your Affinity Risk AI guide. Ask me about WC quotes, your RiskDrive™ score, or 1099 compliance." },
   ]);
 
   function send() {
@@ -387,7 +387,7 @@ function FinnWidget() {
             </div>
             <div>
               <div className="text-white font-bold text-sm">Finn</div>
-              <div className="text-orange-100 text-[10px]">RiskDrive AI Guide</div>
+              <div className="text-orange-100 text-[10px]">RiskDrive™ AI Guide</div>
             </div>
             <div className="ml-auto flex items-center gap-1">
               <div className="w-1.5 h-1.5 rounded-full bg-green-300" />

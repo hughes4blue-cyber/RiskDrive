@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { claimsTable, facilitiesTable, clubsTable, driversTable, accidentsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
@@ -41,17 +42,21 @@ async function formatClaim(c: typeof claimsTable.$inferSelect) {
 }
 
 router.get("/claims", async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
   const status = req.query.status as string | undefined;
-  let rows = await db.select().from(claimsTable).orderBy(desc(claimsTable.fnolReceivedAt));
-  if (facilityId) rows = rows.filter(c => c.facilityId === facilityId);
+  const where = scopeWhere(claimsTable.facilityId, req.scopeFacilityIds);
+  let rows = where
+    ? await db.select().from(claimsTable).where(where).orderBy(desc(claimsTable.fnolReceivedAt))
+    : await db.select().from(claimsTable).orderBy(desc(claimsTable.fnolReceivedAt));
   if (status) rows = rows.filter(c => c.status === status);
   const result = await Promise.all(rows.map(formatClaim));
   res.json(result);
 });
 
-router.get("/claims/summary", async (_req, res) => {
-  const all = await db.select().from(claimsTable);
+router.get("/claims/summary", async (req, res) => {
+  const where = scopeWhere(claimsTable.facilityId, req.scopeFacilityIds);
+  const all = where
+    ? await db.select().from(claimsTable).where(where)
+    : await db.select().from(claimsTable);
   const total = all.length;
   const open = all.filter(c => c.status !== "closed").length;
   const litigated = all.filter(c => c.isLitigated).length;
@@ -66,6 +71,9 @@ router.get("/claims/:claimId", async (req, res) => {
   const id = parseInt(req.params.claimId as string);
   const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
   if (!c) return res.status(404).json({ error: "Claim not found" });
+  if (!inScope(req.scopeFacilityIds, c.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   return res.json(await formatClaim(c));
 });
 
@@ -73,6 +81,9 @@ router.patch("/claims/:claimId/advance", async (req, res) => {
   const id = parseInt(req.params.claimId as string);
   const [c] = await db.select().from(claimsTable).where(eq(claimsTable.id, id));
   if (!c) return res.status(404).json({ error: "Claim not found" });
+  if (!inScope(req.scopeFacilityIds, c.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const idx = CLAIM_STEPS.indexOf(c.status);
   if (idx === -1 || idx === CLAIM_STEPS.length - 1) return res.status(400).json({ error: "Cannot advance" });
   const next = CLAIM_STEPS[idx + 1];

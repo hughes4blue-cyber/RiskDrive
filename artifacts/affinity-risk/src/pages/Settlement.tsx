@@ -91,7 +91,7 @@ export default function Settlement() {
           <div className="grid grid-cols-3 gap-4 text-xs text-blue-700">
             <div className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">1</span><span>AAA Club collects the gross service settlement from the tow operator at the end of each period</span></div>
             <div className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">2</span><span>Insurance premium installment is deducted automatically — no separate invoice needed</span></div>
-            <div className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>Net payout is disbursed to the hauler — Affinity RiskDrive provides a full audit trail per period</span></div>
+            <div className="flex items-start gap-2"><span className="w-5 h-5 rounded-full bg-blue-600 text-white text-[10px] flex items-center justify-center flex-shrink-0 mt-0.5">3</span><span>Net payout is disbursed to the hauler — Affinity RiskDrive™ provides a full audit trail per period</span></div>
           </div>
         </div>
 

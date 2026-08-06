@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { submissionsTable, policiesTable, facilitiesTable, clubsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
@@ -50,9 +51,10 @@ function formatPolicy(p: typeof policiesTable.$inferSelect, facilityName?: strin
 }
 
 router.get("/submissions", async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
-  let rows = await db.select().from(submissionsTable).orderBy(desc(submissionsTable.updatedAt));
-  if (facilityId) rows = rows.filter(s => s.facilityId === facilityId);
+  const where = scopeWhere(submissionsTable.facilityId, req.scopeFacilityIds);
+  const rows = where
+    ? await db.select().from(submissionsTable).where(where).orderBy(desc(submissionsTable.updatedAt))
+    : await db.select().from(submissionsTable).orderBy(desc(submissionsTable.updatedAt));
   const result = await Promise.all(rows.map(formatSubmission));
   res.json(result);
 });
@@ -60,6 +62,9 @@ router.get("/submissions", async (req, res) => {
 router.post("/submissions", async (req, res) => {
   const { facilityId, carrierName, notes } = req.body as { facilityId: number; carrierName?: string; notes?: string };
   if (!facilityId) return res.status(400).json({ error: "facilityId required" });
+  if (!inScope(req.scopeFacilityIds, facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const [s] = await db.insert(submissionsTable).values({
     facilityId,
@@ -75,6 +80,9 @@ router.get("/submissions/:submissionId", async (req, res) => {
   const id = parseInt(req.params.submissionId as string);
   const [s] = await db.select().from(submissionsTable).where(eq(submissionsTable.id, id));
   if (!s) return res.status(404).json({ error: "Submission not found" });
+  if (!inScope(req.scopeFacilityIds, s.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   return res.json(await formatSubmission(s));
 });
 
@@ -82,6 +90,9 @@ router.patch("/submissions/:submissionId/advance", async (req, res) => {
   const id = parseInt(req.params.submissionId as string);
   const [s] = await db.select().from(submissionsTable).where(eq(submissionsTable.id, id));
   if (!s) return res.status(404).json({ error: "Submission not found" });
+  if (!inScope(req.scopeFacilityIds, s.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
 
   const currentIdx = SUBMISSION_STEPS.indexOf(s.status);
   if (currentIdx === -1 || currentIdx === SUBMISSION_STEPS.length - 1) {
@@ -108,9 +119,10 @@ router.patch("/submissions/:submissionId/advance", async (req, res) => {
 });
 
 router.get("/policies", async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
-  let rows = await db.select().from(policiesTable).orderBy(desc(policiesTable.createdAt));
-  if (facilityId) rows = rows.filter(p => p.facilityId === facilityId);
+  const where = scopeWhere(policiesTable.facilityId, req.scopeFacilityIds);
+  const rows = where
+    ? await db.select().from(policiesTable).where(where).orderBy(desc(policiesTable.createdAt))
+    : await db.select().from(policiesTable).orderBy(desc(policiesTable.createdAt));
 
   const result = await Promise.all(rows.map(async (p) => {
     const [fac] = await db.select({ f: facilitiesTable, clubName: clubsTable.name })
@@ -126,6 +138,9 @@ router.get("/policies/:policyId", async (req, res) => {
   const id = parseInt(req.params.policyId as string);
   const [p] = await db.select().from(policiesTable).where(eq(policiesTable.id, id));
   if (!p) return res.status(404).json({ error: "Policy not found" });
+  if (!inScope(req.scopeFacilityIds, p.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const [fac] = await db.select({ f: facilitiesTable, clubName: clubsTable.name })
     .from(facilitiesTable)
     .leftJoin(clubsTable, eq(facilitiesTable.clubId, clubsTable.id))

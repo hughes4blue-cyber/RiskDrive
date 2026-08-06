@@ -1,11 +1,13 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { Readable } from "stream";
+import { eq } from "drizzle-orm";
 import {
   RequestUploadUrlBody,
   RequestUploadUrlResponse,
 } from "@workspace/api-zod";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
-import { ObjectPermission } from "../lib/objectAcl";
+import { db, insuranceDocumentsTable } from "@workspace/db";
+import { inScope } from "../lib/scope";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -16,6 +18,7 @@ const objectStorageService = new ObjectStorageService();
  * Request a presigned URL for file upload.
  * The client sends JSON metadata (name, size, contentType) — NOT the file.
  * Then uploads the file directly to the returned presigned URL.
+ * Scope enforcement happens at document registration time (POST /insurance-documents).
  */
 router.post("/storage/uploads/request-url", async (req: Request, res: Response) => {
   const parsed = RequestUploadUrlBody.safeParse(req.body);
@@ -80,32 +83,39 @@ router.get("/storage/public-objects/*filePath", async (req: Request, res: Respon
 /**
  * GET /storage/objects/*
  *
- * Serve object entities from PRIVATE_OBJECT_DIR.
- * These are served from a separate path from /public-objects and can optionally
- * be protected with authentication or ACL checks based on the use case.
+ * Serve private object entities. Protected with tenant-aware authorization:
+ * the object is looked up via the insurance_documents table to determine which
+ * facility owns it, and the request is rejected if that facility is outside
+ * the authenticated user's scope.
+ *
+ * In demo mode (scopeFacilityIds === null) access is unrestricted — the demo
+ * environment contains only sample data.
  */
 router.get("/storage/objects/*path", async (req: Request, res: Response) => {
   try {
     const raw = req.params.path;
     const wildcardPath = Array.isArray(raw) ? raw.join("/") : raw;
     const objectPath = `/objects/${wildcardPath}`;
+
+    // Tenant-aware authorization: look up the document that owns this object
+    const [ownerDoc] = await db
+      .select({ facilityId: insuranceDocumentsTable.facilityId })
+      .from(insuranceDocumentsTable)
+      .where(eq(insuranceDocumentsTable.fileKey, objectPath))
+      .limit(1);
+
+    if (!ownerDoc) {
+      // Object exists in storage but has no owning document record — deny
+      res.status(404).json({ error: "Object not found" });
+      return;
+    }
+
+    if (!inScope(req.scopeFacilityIds, ownerDoc.facilityId)) {
+      res.status(403).json({ error: "Access denied" });
+      return;
+    }
+
     const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
-
-    // --- Protected route example (uncomment when using replit-auth) ---
-    // if (!req.isAuthenticated()) {
-    //   res.status(401).json({ error: "Unauthorized" });
-    //   return;
-    // }
-    // const canAccess = await objectStorageService.canAccessObjectEntity({
-    //   userId: req.user.id,
-    //   objectFile,
-    //   requestedPermission: ObjectPermission.READ,
-    // });
-    // if (!canAccess) {
-    //   res.status(403).json({ error: "Forbidden" });
-    //   return;
-    // }
-
     const response = await objectStorageService.downloadObject(objectFile);
 
     res.status(response.status);

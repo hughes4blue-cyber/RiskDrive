@@ -13,7 +13,7 @@ export default function SignInPage() {
             className="h-10 mx-auto mb-3"
             style={{ filter: "brightness(0) saturate(100%) invert(14%) sepia(42%) saturate(789%) hue-rotate(175deg) brightness(91%) contrast(99%)" }}
           />
-          <h1 className="text-xl font-bold text-slate-900">Sign in to RiskDrive</h1>
+          <h1 className="text-xl font-bold text-slate-900">Sign in to RiskDrive™</h1>
           <p className="text-sm text-slate-500 mt-1">Affinity Risk Solutions — AAA Towing Network Platform</p>
         </div>
         <SignIn

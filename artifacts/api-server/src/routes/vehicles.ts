@@ -3,32 +3,30 @@ import { db } from "@workspace/db";
 import { vehiclesTable, facilitiesTable, driversTable, telematicsEventsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { auditAccess } from "../middlewares/audit";
+import { scopeWhere, inScope } from "../lib/scope";
 
 const router = Router();
 
 router.get("/vehicles", auditAccess("vehicle"), async (req, res) => {
-  const facilityId = req.query.facilityId ? parseInt(req.query.facilityId as string) : undefined;
-  let rows;
-  if (facilityId) {
-    rows = await db.select({
-      vehicle: vehiclesTable,
-      facilityName: facilitiesTable.name,
-      driverFirst: driversTable.firstName,
-      driverLast: driversTable.lastName,
-    }).from(vehiclesTable)
-      .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
-      .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id))
-      .where(eq(vehiclesTable.facilityId, facilityId));
-  } else {
-    rows = await db.select({
-      vehicle: vehiclesTable,
-      facilityName: facilitiesTable.name,
-      driverFirst: driversTable.firstName,
-      driverLast: driversTable.lastName,
-    }).from(vehiclesTable)
-      .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
-      .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id));
-  }
+  const where = scopeWhere(vehiclesTable.facilityId, req.scopeFacilityIds);
+  const rows = where
+    ? await db.select({
+        vehicle: vehiclesTable,
+        facilityName: facilitiesTable.name,
+        driverFirst: driversTable.firstName,
+        driverLast: driversTable.lastName,
+      }).from(vehiclesTable)
+        .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
+        .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id))
+        .where(where)
+    : await db.select({
+        vehicle: vehiclesTable,
+        facilityName: facilitiesTable.name,
+        driverFirst: driversTable.firstName,
+        driverLast: driversTable.lastName,
+      }).from(vehiclesTable)
+        .leftJoin(facilitiesTable, eq(vehiclesTable.facilityId, facilitiesTable.id))
+        .leftJoin(driversTable, eq(vehiclesTable.assignedDriverId, driversTable.id));
 
   res.json(rows.map(({ vehicle: v, facilityName, driverFirst, driverLast }) => ({
     id: v.id, facilityId: v.facilityId, facilityName, make: v.make, model: v.model,
@@ -54,6 +52,11 @@ router.get("/vehicles/:vehicleId", auditAccess("vehicle", (r) => r.params.vehicl
     .where(eq(vehiclesTable.id, vehicleId));
 
   if (!row) return res.status(404).json({ error: "Vehicle not found" });
+
+  if (!inScope(req.scopeFacilityIds, row.vehicle.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+
   const { vehicle: v, facilityName, driverFirst, driverLast } = row;
   return res.json({
     id: v.id, facilityId: v.facilityId, facilityName, make: v.make, model: v.model,
@@ -68,9 +71,14 @@ router.get("/vehicles/:vehicleId", auditAccess("vehicle", (r) => r.params.vehicl
 
 router.get("/vehicles/:vehicleId/telematics", async (req, res) => {
   const vehicleId = parseInt(req.params.vehicleId);
+  const [vehicle] = await db.select().from(vehiclesTable).where(eq(vehiclesTable.id, vehicleId));
+  if (!vehicle) return res.status(404).json({ error: "Vehicle not found" });
+  if (!inScope(req.scopeFacilityIds, vehicle.facilityId)) {
+    return res.status(403).json({ error: "Access denied" });
+  }
   const events = await db.select().from(telematicsEventsTable)
     .where(eq(telematicsEventsTable.vehicleId, vehicleId));
-  res.json(events.map(e => ({
+  return res.json(events.map(e => ({
     id: e.id, vehicleId: e.vehicleId, driverId: e.driverId,
     eventType: e.eventType, severity: e.severity,
     latitude: e.latitude, longitude: e.longitude,
