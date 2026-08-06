@@ -13,23 +13,14 @@ import {
 
 const router = Router();
 
-// GET /api/auth/me — current user info + platform mode
-router.get("/auth/me", async (req, res): Promise<void> => {
+// GET /api/auth/me — current user info + platform mode (requires auth)
+router.get("/auth/me", requireAuth, async (req, res): Promise<void> => {
   const mode = await getAppMode();
-  const auth = getAuth(req);
-
-  if (!auth.userId) {
-    res.json({ mode, authenticated: false, user: null });
-    return;
-  }
-
-  const email = auth.sessionClaims?.email as string | undefined;
-  const user = await resolveUser(auth.userId, email);
-  res.json({ mode, authenticated: true, user });
+  res.json({ mode, authenticated: true, user: req.appUser });
 });
 
-// GET /api/app-settings/mode — public endpoint, returns current mode
-router.get("/app-settings/mode", async (_req, res): Promise<void> => {
+// GET /api/app-settings/mode — returns current mode (requires auth)
+router.get("/app-settings/mode", requireAuth, async (_req, res): Promise<void> => {
   const mode = await getAppMode();
   res.json({ mode });
 });

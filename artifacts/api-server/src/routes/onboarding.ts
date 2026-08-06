@@ -87,8 +87,7 @@ router.patch("/onboarding/:facilityId", async (req, res) => {
   const allDone = CHECKLIST_FIELDS.every(f => update[f] !== undefined ? update[f] : existing[f]);
   if (allDone && !existing.completedAt) update.completedAt = new Date();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [updated] = await db.update(onboardingChecklistsTable).set(update as any).where(eq(onboardingChecklistsTable.facilityId, facilityId)).returning();
+  const [updated] = await db.update(onboardingChecklistsTable).set(update as Partial<typeof onboardingChecklistsTable.$inferInsert>).where(eq(onboardingChecklistsTable.facilityId, facilityId)).returning();
   return res.json(await formatChecklist(updated));
 });
 

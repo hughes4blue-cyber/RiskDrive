@@ -69,6 +69,8 @@ declare global {
   namespace Express {
     interface Request {
       appUser?: typeof usersTable.$inferSelect;
+      /** Current app mode, set by requireLiveMode so downstream middleware avoids a second DB call. */
+      appMode?: "demo" | "live";
       /**
        * Resolved tenant scope:
        *   null  = no restriction (demo mode, super_admin)
@@ -103,19 +105,15 @@ export async function requireAuth(
   next();
 }
 
-// ── requireLiveMode — gates all regular routes in Live mode ──────────
-// Demo mode: pass through (no login needed).
-// Live mode: must be signed in AND approved.
+// ── requireLiveMode — gates all regular routes ───────────────────────
+// All modes: must have a valid Clerk session.
+// Live mode: additionally requires an approved account.
+// Demo mode: any authenticated user gets unrestricted scope.
 export async function requireLiveMode(
   req: Request,
   res: Response,
   next: NextFunction,
 ): Promise<void> {
-  const mode = await getAppMode();
-  if (mode === "demo") {
-    next();
-    return;
-  }
   const auth = getAuth(req);
   if (!auth.userId) {
     res.status(401).json({ error: "Authentication required" });
@@ -123,13 +121,16 @@ export async function requireLiveMode(
   }
   const email = auth.sessionClaims?.email as string | undefined;
   const user = await resolveUser(auth.userId, email);
-  if (user.approvalStatus !== "approved") {
+  req.appUser = user;
+
+  const mode = await getAppMode();
+  req.appMode = mode; // propagate to resolveScope to avoid a second DB round-trip
+  if (mode === "live" && user.approvalStatus !== "approved") {
     res
       .status(403)
       .json({ error: "pending_approval", approvalStatus: user.approvalStatus });
     return;
   }
-  req.appUser = user;
   next();
 }
 
@@ -148,9 +149,10 @@ export function requireSuperAdmin(
 }
 
 // ── resolveScope — resolves tenant boundaries for every data route ────
-// Must run AFTER requireLiveMode (req.appUser set only in Live mode).
-// In Demo mode req.appUser is undefined → null scope (all data visible).
+// Must run AFTER requireLiveMode (req.appUser always set after that gate).
 //
+// Demo mode : scopeFacilityIds=null, scopeClubIds=null  (unrestricted — auth
+//             is still required, but all data is visible regardless of role)
 // super_admin : scopeFacilityIds=null, scopeClubIds=null  (unrestricted)
 // club        : scopeFacilityIds = all facilities in user.clubId
 //               scopeClubIds    = [user.clubId]
@@ -164,7 +166,17 @@ export async function resolveScope(
 ): Promise<void> {
   const user = req.appUser;
 
-  // Demo mode (no appUser) or super_admin: unrestricted
+  // Demo mode: authenticated but unrestricted — any user can see all demo data.
+  // req.appMode is set by requireLiveMode; if absent fall back to a fresh lookup.
+  const mode = req.appMode ?? (await getAppMode());
+  if (mode === "demo") {
+    req.scopeFacilityIds = null;
+    req.scopeClubIds = null;
+    next();
+    return;
+  }
+
+  // Live mode — super_admin: unrestricted
   if (!user || user.role === "super_admin") {
     req.scopeFacilityIds = null;
     req.scopeClubIds = null;

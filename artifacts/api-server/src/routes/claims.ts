@@ -86,19 +86,37 @@ router.patch("/claims/:claimId/advance", async (req, res) => {
   }
   const idx = CLAIM_STEPS.indexOf(c.status);
   if (idx === -1 || idx === CLAIM_STEPS.length - 1) return res.status(400).json({ error: "Cannot advance" });
-  const next = CLAIM_STEPS[idx + 1];
+  const nextStatus = CLAIM_STEPS[idx + 1];
   const now = new Date();
-  const update: Record<string, unknown> = { status: next, updatedAt: now };
-  if (next === "assigned") update.assignedAt = now;
-  if (next === "under_investigation") update.investigationStartedAt = now;
-  if (next === "adjudication") update.adjudicatedAt = now;
-  if (next === "closed") { update.closedAt = now; update.exonerationStatus = req.body.exonerationStatus ?? "pending"; }
-  if (req.body.adjusterName) update.adjusterName = req.body.adjusterName;
-  if (req.body.reserveAmount !== undefined) update.reserveAmount = req.body.reserveAmount;
-  if (req.body.settlementAmount !== undefined) update.settlementAmount = req.body.settlementAmount;
-  if (req.body.litigationNotes) { update.litigationNotes = req.body.litigationNotes; update.isLitigated = true; }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [updated] = await db.update(claimsTable).set(update as any).where(eq(claimsTable.id, id)).returning();
+
+  // Build a strictly typed update — only known claim columns are touched
+  const update: Partial<typeof claimsTable.$inferInsert> = {
+    status: nextStatus,
+    updatedAt: now,
+  };
+
+  if (nextStatus === "assigned") update.assignedAt = now;
+  if (nextStatus === "under_investigation") update.investigationStartedAt = now;
+  if (nextStatus === "adjudication") update.adjudicatedAt = now;
+  if (nextStatus === "closed") {
+    update.closedAt = now;
+    const exon = req.body.exonerationStatus;
+    update.exonerationStatus =
+      exon === "exonerated" || exon === "not_exonerated" || exon === "pending"
+        ? exon
+        : "pending";
+  }
+
+  // Only accept explicitly whitelisted body fields; validate types before writing
+  if (typeof req.body.adjusterName === "string") update.adjusterName = req.body.adjusterName;
+  if (typeof req.body.reserveAmount === "number") update.reserveAmount = req.body.reserveAmount;
+  if (typeof req.body.settlementAmount === "number") update.settlementAmount = req.body.settlementAmount;
+  if (typeof req.body.litigationNotes === "string") {
+    update.litigationNotes = req.body.litigationNotes;
+    update.isLitigated = true;
+  }
+
+  const [updated] = await db.update(claimsTable).set(update).where(eq(claimsTable.id, id)).returning();
   return res.json(await formatClaim(updated));
 });
 

@@ -60,8 +60,8 @@ function buildCredentials(input: ReturnType<typeof CreateTelematicsConnectionBod
 router.get("/telematics/connections", async (req, res): Promise<void> => {
   const where = scopeWhere(telematicsConnectionsTable.facilityId, req.scopeFacilityIds);
   const rows = where
-    ? await db.select().from(telematicsConnectionsTable).where(where).orderBy(desc(telematicsConnectionsTable.createdAt))
-    : await db.select().from(telematicsConnectionsTable).orderBy(desc(telematicsConnectionsTable.createdAt));
+    ? await db.select().from(telematicsConnectionsTable).where(where).orderBy(desc(telematicsConnectionsTable.updatedAt))
+    : await db.select().from(telematicsConnectionsTable).orderBy(desc(telematicsConnectionsTable.updatedAt));
   res.json(rows.map(toPublic));
 });
 
@@ -124,10 +124,10 @@ router.post("/telematics/connections", async (req, res): Promise<void> => {
     .values({
       facilityId: input.facilityId,
       provider: input.provider,
-      status: "active",
-      encryptedCredentials,
-      accountLabel: input.accountLabel ?? orgName ?? input.provider,
+      accountLabel: input.accountLabel ?? null,
       externalOrgName: orgName,
+      encryptedCredentials,
+      status: "active",
     })
     .returning();
   res.status(201).json(toPublic(created!));
