@@ -26,9 +26,9 @@ export default function Slide09CTA() {
 
         <div className="bg-white/8 rounded-2xl px-[5vw] py-[3vh] flex flex-col items-center gap-[1.2vh] border border-white/15">
           <span className="text-[2.5vw] font-black text-[#E8511A] font-display tracking-tight">
-            affinity-fleet-analytics.replit.app
+            affinityriskdrive.com
           </span>
-          <span className="text-[1.5vw] text-white/55 font-body">Powered by Affinity Risk Solutions</span>
+          <span className="text-[1.5vw] text-white/55 font-body">hello@affinityriskdrive.com</span>
         </div>
       </div>
 

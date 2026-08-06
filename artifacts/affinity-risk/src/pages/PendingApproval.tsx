@@ -29,11 +29,11 @@ export default function PendingApproval() {
         </div>
 
         <a
-          href="mailto:ahughes@affinityrisk.com"
+          href="mailto:hello@affinityriskdrive.com"
           className="flex items-center justify-center gap-2 text-sm text-teal-600 hover:text-teal-700 font-medium mb-6"
         >
           <Mail className="w-4 h-4" />
-          Contact ahughes@affinityrisk.com to expedite
+          Contact hello@affinityriskdrive.com to expedite
         </a>
 
         <button

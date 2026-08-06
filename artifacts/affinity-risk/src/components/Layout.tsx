@@ -321,6 +321,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             © 2026 Affinity Risk Solutions · Powered by RiskDrive™ · Telematics-Based Insurance Intelligence
           </div>
           <div className="flex items-center gap-4 text-xs text-slate-400">
+            <a href="mailto:hello@affinityriskdrive.com" className="hover:text-orange-500 transition-colors">hello@affinityriskdrive.com</a>
             <Link href="/finn" className="hover:text-orange-500 transition-colors">Ask Finn</Link>
             <Link href="/wc-quote" className="hover:text-orange-500 transition-colors">WC Quote</Link>
             <Link href="/fleet-score" className="hover:text-orange-500 transition-colors">RiskDrive™ Score</Link>
