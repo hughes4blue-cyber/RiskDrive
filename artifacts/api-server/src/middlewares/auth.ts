@@ -48,9 +48,24 @@ export async function resolveUser(
     .from(usersTable)
     .where(eq(usersTable.clerkUserId, clerkUserId))
     .limit(1);
-  if (existing[0]) return existing[0];
 
   const isAdmin = !!email && email.toLowerCase() === ADMIN_EMAIL;
+
+  if (existing[0]) {
+    // Self-heal: if the admin email is now known but the record wasn't
+    // bootstrapped correctly (e.g. Clerk didn't include email on first login),
+    // promote the record in-place so the admin isn't stuck as pending.
+    if (isAdmin && (existing[0].approvalStatus !== "approved" || existing[0].role !== "super_admin")) {
+      const [updated] = await db
+        .update(usersTable)
+        .set({ email: email!, role: "super_admin", approvalStatus: "approved", updatedAt: new Date() })
+        .where(eq(usersTable.clerkUserId, clerkUserId))
+        .returning();
+      return updated!;
+    }
+    return existing[0];
+  }
+
   const [newUser] = await db
     .insert(usersTable)
     .values({
