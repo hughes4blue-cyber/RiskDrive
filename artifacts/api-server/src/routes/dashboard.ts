@@ -83,15 +83,29 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
     db.select().from(driversTable).where(scopeWhere(driversTable.facilityId, facilityIds)!),
   ]);
 
+  // Fetch telematics events scoped to the vehicles in these facilities
+  const vehicleIds = vehicles.map(v => v.id);
+  const vehicleWhere = scopeWhere(telematicsEventsTable.vehicleId, vehicleIds);
+  const telematicsEvents = vehicleIds.length > 0 && vehicleWhere
+    ? await db
+        .select({
+          driverId: telematicsEventsTable.driverId,
+          eventType: telematicsEventsTable.eventType,
+          severity: telematicsEventsTable.severity,
+        })
+        .from(telematicsEventsTable)
+        .where(vehicleWhere)
+    : [];
+
   const sorted = [...drivers]
     .sort((a: any, b: any) => (b.riskScore ?? 0) - (a.riskScore ?? 0))
     .slice(0, 8);
 
   const result = sorted.map((d: any) => {
     const fac = facilities.find(f => f.id === d.facilityId);
-    const driverEvents = events.filter((e: any) => e.driverId === d.id);
+    const driverEvents = telematicsEvents.filter((e) => e.driverId === d.id);
     const severityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
-    const topEvent = driverEvents.sort((a: any, b: any) =>
+    const topEvent = driverEvents.sort((a, b) =>
       (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
     )[0];
     const topIssue = topEvent ? topEvent.eventType.replace(/_/g, " ") : "No recent events";
@@ -105,47 +119,6 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
     };
   });
 
-  const where = scopeWhere(telematicsEventsTable.facilityId, req.scopeFacilityIds);
-  return res.json(result);
-});
-
-router.get("/dashboard/telematics-activity", async (req, res) => {
-  // Scope events through vehicles in the user's facilities
-  const facilities = await getScopedFacilities(req.scopeFacilityIds);
-  const facilityIds = facilities.map(f => f.id);
-
-  if (facilityIds.length === 0) {
-    return res.json([]);
-  }
-
-  const [drivers, events] = await Promise.all([
-    db.select().from(driversTable).where(scopeWhere(driversTable.facilityId, facilityIds)!),
-    db.select().from(telematicsEventsTable),
-  ]);
-
-  const sorted = [...drivers]
-    .sort((a: any, b: any) => (b.riskScore ?? 0) - (a.riskScore ?? 0))
-    .slice(0, 8);
-
-  const result = sorted.map((d: any) => {
-    const fac = facilities.find(f => f.id === d.facilityId);
-    const driverEvents = events.filter((e: any) => e.driverId === d.id);
-    const severityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
-    const topEvent = driverEvents.sort((a: any, b: any) =>
-      (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
-    )[0];
-    const topIssue = topEvent ? topEvent.eventType.replace(/_/g, " ") : "No recent events";
-    return {
-      driverId: d.id,
-      driverName: `${d.firstName} ${d.lastName}`,
-      facilityName: fac?.name ?? "Unknown",
-      riskScore: d.riskScore,
-      riskTier: d.riskTier,
-      topIssue,
-    };
-  });
-
-  const where = scopeWhere(telematicsEventsTable.facilityId, req.scopeFacilityIds);
   return res.json(result);
 });
 

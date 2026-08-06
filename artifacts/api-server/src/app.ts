@@ -1,6 +1,7 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
+import rateLimit from "express-rate-limit";
 import { clerkMiddleware } from "@clerk/express";
 import { publishableKeyFromHost } from "@clerk/shared/keys";
 import {
@@ -11,7 +12,25 @@ import {
 import router from "./routes";
 import { logger } from "./lib/logger";
 
+/**
+ * Global API rate limiter — 120 requests per minute per IP.
+ * Protects expensive aggregate/join endpoints from unauthenticated abuse
+ * that could exhaust the PostgreSQL connection pool.
+ */
+const apiRateLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+
 const app: Express = express();
+
+// Trust exactly one reverse-proxy hop (the Replit edge proxy).
+// This allows Express to derive req.ip from X-Forwarded-For while
+// rejecting spoofed headers that arrive with more than one hop.
+app.set("trust proxy", 1);
 
 app.use(
   pinoHttp({
@@ -55,6 +74,6 @@ app.use(
   })),
 );
 
-app.use("/api", router);
+app.use("/api", apiRateLimiter, router);
 
 export default app;
