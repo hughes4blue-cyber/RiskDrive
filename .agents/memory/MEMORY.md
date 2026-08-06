@@ -6,3 +6,4 @@
 - [RiskDrive telematics sync architecture](telematics-sync-arch.md) — Samsara=Bearer token; Geotab=JSON-RPC+session; sync upserts one-by-one (batching is a known future improvement).
 - [RQ v5 UseQueryOptions pattern](rq-v5-query-options.md) — UseQueryOptions requires queryKey in v5; use conditional component mount instead of `enabled` flag.
 - [pdf-parse ESM import](pdf-parse-esm.md) — CJS pdf-parse in ESM server needs createRequire(import.meta.url), not import() of internal path.
+- [Vite config PORT in build mode](vite-config-port-build.md) — PORT env var is absent during `vite build`; use defineConfig callback and skip PORT check when command==="build".

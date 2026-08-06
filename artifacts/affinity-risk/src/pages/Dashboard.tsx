@@ -2,7 +2,7 @@ import { Link, Redirect } from "wouter";
 import { AlertTriangle, ChevronRight, TrendingDown } from "lucide-react";
 import {
   useGetDashboardOverview, useGetRiskDistribution, useGetRecentAccidents,
-  useGetTopRiskDrive™rs, useGetTelematicsActivity, useGetCurrentUser,
+  useGetTopRiskDrivers, useGetTelematicsActivity, useGetCurrentUser,
 } from "@workspace/api-client-react";
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid
@@ -220,7 +220,7 @@ export default function Dashboard() {
   const { data: overview, isLoading: ovLoading } = useGetDashboardOverview();
   const { data: distribution, isLoading: distLoading } = useGetRiskDistribution();
   const { data: accidents, isLoading: accLoading } = useGetRecentAccidents();
-  const { data: topDrivers, isLoading: drLoading } = useGetTopRiskDrive™rs();
+  const { data: topDrivers, isLoading: drLoading } = useGetTopRiskDrivers();
   const { data: activity, isLoading: actLoading } = useGetTelematicsActivity();
 
   const appUser = meData?.user;
