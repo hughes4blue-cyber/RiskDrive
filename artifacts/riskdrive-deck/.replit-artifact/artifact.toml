@@ -1,0 +1,28 @@
+kind = "slides"
+previewPath = "/riskdrive-deck/"
+title = "RiskDrive™ Platform Deck"
+description = "Client-facing pitch deck for RiskDrive™ by Affinity Risk — telematics-based insurance intelligence for AAA clubs and towing networks. 9 slides covering the value proposition, risk scoring, WC insurance, claims, and compliance."
+version = "1.0.0"
+id = "artifacts/riskdrive-deck"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/riskdrive-deck/" ]
+localPort = 25642
+
+[services.development]
+run = "pnpm --filter @workspace/riskdrive-deck run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/riskdrive-deck", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/riskdrive-deck/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25642"
+BASE_PATH = "/riskdrive-deck/"

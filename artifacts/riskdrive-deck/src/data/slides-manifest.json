@@ -1,0 +1,74 @@
+[
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000001",
+    "position": 1,
+    "filepath": "src/pages/slides/Slide01Cover.tsx",
+    "title": "RiskDrive™ by Affinity Risk",
+    "description": "Cover slide — full-bleed tow truck hero image with navy overlay and tagline",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000002",
+    "position": 2,
+    "filepath": "src/pages/slides/Slide02Problem.tsx",
+    "title": "Towing Insurance Is Broken",
+    "description": "Problem slide — 4 pain points in a 2×2 card grid",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000003",
+    "position": 3,
+    "filepath": "src/pages/slides/Slide03Steps.tsx",
+    "title": "From Telematics Data to Lower Premiums",
+    "description": "Three-step process on a navy background",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000004",
+    "position": 4,
+    "filepath": "src/pages/slides/Slide04Score.tsx",
+    "title": "The RiskDrive™ Score",
+    "description": "Score breakdown — 4 weighted components with bar chart and tier table",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000005",
+    "position": 5,
+    "filepath": "src/pages/slides/Slide05WorkersComp.tsx",
+    "title": "Workers' Comp Built for Tow Operators",
+    "description": "WC benefits — 5 bullets plus savings and turnaround callout cards",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000006",
+    "position": 6,
+    "filepath": "src/pages/slides/Slide06Claims.tsx",
+    "title": "Claims That Pay You Back",
+    "description": "Claims slide — full-bleed dashcam image with 25% exoneration stat hero",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000007",
+    "position": 7,
+    "filepath": "src/pages/slides/Slide07Compliance.tsx",
+    "title": "Compliance on Autopilot",
+    "description": "Four compliance features in a 2×2 card grid",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000008",
+    "position": 8,
+    "filepath": "src/pages/slides/Slide08Dashboard.tsx",
+    "title": "Your Entire AAA Network, One Dashboard",
+    "description": "Dashboard overview — bullet list left, live score panel right",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1a2b3c4-0001-4000-8001-000000000009",
+    "position": 9,
+    "filepath": "src/pages/slides/Slide09CTA.tsx",
+    "title": "Ready to Lower Your Fleet's Risk?",
+    "description": "Closing slide — CTA with URL on navy background",
+    "speakerNotes": ""
+  }
+]
