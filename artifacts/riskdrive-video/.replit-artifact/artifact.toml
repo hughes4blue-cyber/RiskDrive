@@ -1,0 +1,28 @@
+kind = "video"
+previewPath = "/riskdrive-video/"
+title = "RiskDrive™ Marketing Video"
+description = "30-45 second animated explainer video for RiskDrive™ summarizing the Connect → Score → Save flow. Uses brand colors (#0D3D56 navy, #E8511A orange) and Barlow Condensed typography. Ideal for embedding in email campaigns or LinkedIn outreach to AAA clubs."
+version = "1.0.0"
+id = "artifacts/riskdrive-video"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/riskdrive-video/" ]
+localPort = 23317
+
+[services.development]
+run = "pnpm --filter @workspace/riskdrive-video run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/riskdrive-video", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/riskdrive-video/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23317"
+BASE_PATH = "/riskdrive-video/"

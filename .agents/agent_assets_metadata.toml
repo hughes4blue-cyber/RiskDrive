@@ -7,3 +7,10 @@ uri = "file://.local/outputs/RiskDrive--Platform-Deck.pptx"
 type = "slides"
 title = "RiskDrive™ Platform Deck (PPTX)"
 description = "Downloadable PowerPoint — 9 slides, ready to email to AAA club contacts."
+
+[[outputs]]
+id = "rdRUG6HsKaoT4yFg8rcdj"
+uri = "file://artifacts/riskdrive-video/public/audio/bg_music.mp3"
+type = "audio"
+title = "RiskDrive background music"
+description = "Generated music: Corporate motivational instrumental background music for a B2B insurtech product reveal. Clean piano melody with driving electronic percussion, 105 BPM, confident and data-forward to…"
