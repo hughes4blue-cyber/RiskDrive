@@ -5,7 +5,7 @@
     "filepath": "src/pages/slides/Slide01Cover.tsx",
     "title": "RiskDrive™ by Affinity Risk",
     "description": "Cover slide — full-bleed tow truck hero image with navy overlay and tagline",
-    "speakerNotes": ""
+    "speakerNotes": "• Welcome the audience and introduce yourself and Affinity Risk Solutions — the program administrator purpose-built for AAA towing networks.\n• RiskDrive™ is a telematics-based insurance intelligence platform: it replaces carrier guesswork with real driving data.\n• Today's presentation covers the problem, how the platform works, and what it means for your premiums.\n• The core promise: connect your existing Samsara or Geotab devices and get right-sized premiums based on what your drivers actually do.\n• Invite any questions at the end — the goal is to show you exactly how this applies to your club."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000002",
@@ -13,7 +13,7 @@
     "filepath": "src/pages/slides/Slide02Problem.tsx",
     "title": "Towing Insurance Is Broken",
     "description": "Problem slide — 4 pain points in a 2×2 card grid",
-    "speakerNotes": ""
+    "speakerNotes": "• Today's towing insurance market prices fleets on industry averages and loss-run history, not on how your specific drivers actually behave — good operators subsidize bad ones.\n• One difficult loss year can lock your network out of preferred markets for several renewal cycles, forcing you into surplus lines at significantly higher cost.\n• The contractor classification issue is a hidden liability: many clubs use 1099 tower relationships that expose them to misclassification penalties under state labor law.\n• When a disputed claim hits, the telematics and dashcam evidence that could exonerate your driver is often already overwritten or inaccessible — turning defensible incidents into paid settlements.\n• All four of these problems have a single root cause: no real-time data connecting driver behavior to insurance decisions. That's exactly what RiskDrive™ fixes."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000003",
@@ -21,7 +21,7 @@
     "filepath": "src/pages/slides/Slide03Steps.tsx",
     "title": "From Telematics Data to Lower Premiums",
     "description": "Three-step process on a navy background",
-    "speakerNotes": ""
+    "speakerNotes": "• Step 1 — Connect: if your fleet already runs Samsara or Geotab, setup takes minutes. We validate credentials and pull live vehicle, driver, and safety-event data immediately — no hardware changes required.\n• Step 2 — Score: RiskDrive™ continuously turns that live data into a composite risk score weighted across safety behavior, compliance status, telematics adoption, and training completion.\n• Step 3 — Save: a higher score opens access to 6–8 preferred carrier markets simultaneously. Carriers compete for your business, which is what drives premiums down — up to 22% versus standard market pricing.\n• The entire cycle is ongoing, not a one-time snapshot. As your drivers improve, your score improves, and your next renewal reflects that improvement.\n• This is fundamentally different from the annual loss-run review your current broker relies on."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000004",
@@ -29,7 +29,7 @@
     "filepath": "src/pages/slides/Slide04Score.tsx",
     "title": "The RiskDrive™ Score",
     "description": "Score breakdown — 4 weighted components with bar chart and tier table",
-    "speakerNotes": ""
+    "speakerNotes": "• The score is a composite of four factors, each weighted by its actuarial impact on towing losses: Safety & Behavior (40%), Compliance & Onboarding (30%), Telematics Adoption (20%), and Training Completion (10%).\n• Safety & Behavior is the largest driver — speeding, hard braking, phone use, and fatigue events are the leading indicators of costly claims in the towing segment.\n• The tier table on the right shows what each score band unlocks: an 80+ score opens every preferred market; 70–79 gives access to 6–8 preferred carriers; 55–69 gives standard market access; below 55 limits your options.\n• Networks using RiskDrive™ are already averaging 14% savings versus the industry benchmark across the portfolio.\n• The score updates continuously on a 90-day rolling window, so improvement is reflected at your next renewal — not three years from now."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000005",
@@ -37,7 +37,7 @@
     "filepath": "src/pages/slides/Slide05WorkersComp.tsx",
     "title": "Workers' Comp Built for Tow Operators",
     "description": "WC benefits — 5 bullets plus savings and turnaround callout cards",
-    "speakerNotes": ""
+    "speakerNotes": "• Workers' comp for towing is a specialty market — most standard carriers either won't write it or misprice it significantly because they don't understand the class codes.\n• RiskDrive™ WC is exclusively underwritten by AmTrust, which is the nation's leading towing workers' comp carrier. This is a dedicated program, not a general commercial placement.\n• Premium is calculated on actual payroll by class code, so you're not overpaying on estimated unit counts that don't match your real exposure.\n• Critically, the policy covers both 1099 contractors and W-2 employees under one structure — eliminating the misclassification gap that creates legal exposure for clubs.\n• With clean telematics data, WC savings of 8–22% vs. the standard market are typical, and quotes come back in 24 hours."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000006",
@@ -45,7 +45,7 @@
     "filepath": "src/pages/slides/Slide06Claims.tsx",
     "title": "Claims That Pay You Back",
     "description": "Claims slide — full-bleed dashcam image with 25% exoneration stat hero",
-    "speakerNotes": ""
+    "speakerNotes": "• The claims process starts the moment an incident occurs: RiskDrive™ automatically secures telematics and dashcam evidence before it can be overwritten — this is non-negotiable in the first hour.\n• Every claim moves through a single FNOL-to-resolution pipeline, so nothing falls through the cracks between your club, the carrier, and the TPA.\n• Dedicated TPA partners handle reserves, litigation strategy, and settlement negotiations — your team doesn't need to manage the claims process directly.\n• The stat on this slide tells the real story: 25% of network claims are fully exonerated — meaning the driver is proven not at fault and the claim is closed at $0. That's dashcam and telematics evidence doing the work.\n• A single exoneration on a serious liability claim can easily save $50,000–$100,000. That evidence collection pays for the entire platform many times over."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000007",
@@ -53,7 +53,7 @@
     "filepath": "src/pages/slides/Slide07Compliance.tsx",
     "title": "Compliance on Autopilot",
     "description": "Four compliance features in a 2×2 card grid",
-    "speakerNotes": ""
+    "speakerNotes": "• Compliance failures are the silent premium killer: a lapsed COI, an expired CDL, or a driver with an unreported violation can each void coverage mid-policy or blow up a renewal.\n• AI-powered COI extraction means your team uploads a certificate and the system reads it — no manual data entry, no transcription errors, no missed fields.\n• Automatic expiration alerts fire before any certificate or license lapses, so coverage never goes dark without your knowledge.\n• Continuous MVR monitoring watches for violations and CDL status changes in real time — not just at renewal. A DUI caught two months post-hire is caught now, not at your next loss run review.\n• Onboarding checklists ensure every new operator is verified road-ready before their first dispatch, removing the administrative burden from facility managers."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000008",
@@ -61,7 +61,7 @@
     "filepath": "src/pages/slides/Slide08Dashboard.tsx",
     "title": "Your Entire AAA Network, One Dashboard",
     "description": "Dashboard overview — bullet list left, live score panel right",
-    "speakerNotes": ""
+    "speakerNotes": "• For a regional AAA club managing multiple tow facilities, the dashboard gives you a single command center: one login, every facility's score, incident trends, and training completion status.\n• The right panel shows a live network view — you can see immediately which facilities are performing well (Detroit at 84) and which need attention (Akron at 58), and drill into the specific drivers pulling the score down.\n• Finn, the built-in AI guide, can answer questions about WC policy interpretation, compliance requirements, and score improvement strategies in plain language — no insurance expertise required.\n• Demo mode lets your team explore the platform with realistic sample data before you go live, so there's no learning curve on day one.\n• The network average is 70.4 in this example — already in the preferred-carrier band. The goal is to move every facility above 70 and into the 80+ tier within 12 months."
   },
   {
     "id": "d1a2b3c4-0001-4000-8001-000000000009",
@@ -69,6 +69,6 @@
     "filepath": "src/pages/slides/Slide09CTA.tsx",
     "title": "Ready to Lower Your Fleet's Risk?",
     "description": "Closing slide — CTA with URL on navy background",
-    "speakerNotes": ""
+    "speakerNotes": "• The first step costs nothing: connect your Samsara or Geotab account and get your first RiskDrive™ Score free — no commitment, no carrier changes required upfront.\n• Once you see your score and the carrier options it unlocks, you'll have a clear picture of what your renewal should look like versus what you're paying today.\n• Implementation is lightweight: no new hardware, no IT project. If your telematics devices are already running, you're 90% of the way there.\n• Visit affinity-fleet-analytics.replit.app to start the process, or reach out directly and we'll schedule a live demo with your actual fleet data.\n• Thank the audience and open for Q&A — remind them that every question about their specific club, class codes, or coverage structure can be addressed today."
   }
 ]
