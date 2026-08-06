@@ -160,3 +160,9 @@ overrides:
   esbuild: "0.27.3"
   # qs <=6.15.1 has a remotely triggerable DoS (GHSA-q8mj-m7cp-5q26); pin to patched version
   qs: ">=6.15.2"
+  # uuid <11.1.1 has a vulnerability (GHSA-w5hq-g745-h8pq); pin to patched version
+  uuid: "^11.1.1"
+  # form-data <2.5.6 has CRLF injection (GHSA-hmw2-7cc7-3qxx); pin to patched version
+  form-data: "^2.5.6"
+  # body-parser <2.3.0 has DoS vulnerability (GHSA-v422-hmwv-36x6); pin to patched version
+  body-parser: ">=2.3.0"

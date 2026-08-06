@@ -83,29 +83,34 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
     db.select().from(driversTable).where(scopeWhere(driversTable.facilityId, facilityIds)!),
   ]);
 
-  const sorted = [...accidents]
-    .sort((a, b) => new Date(b.alertedAt ?? 0).getTime() - new Date(a.alertedAt ?? 0).getTime())
-    .slice(0, 10);
+  const sorted = [...drivers]
+    .sort((a: any, b: any) => (b.riskScore ?? 0) - (a.riskScore ?? 0))
+    .slice(0, 8);
 
-  const result = sorted.map(a => {
-    const veh = vehicles.find((v: any) => v.id === a.vehicleId);
-    const drv = drivers.find((d: any) => d.id === a.driverId);
-    const fac = facilities.find(f => f.id === a.facilityId);
+  const result = sorted.map((d: any) => {
+    const fac = facilities.find(f => f.id === d.facilityId);
+    const driverEvents = events.filter((e: any) => e.driverId === d.id);
+    const severityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+    const topEvent = driverEvents.sort((a: any, b: any) =>
+      (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
+    )[0];
+    const topIssue = topEvent ? topEvent.eventType.replace(/_/g, " ") : "No recent events";
     return {
-      id: a.id, vehicleId: a.vehicleId, vehiclePlate: veh?.licensePlate ?? null,
-      driverId: a.driverId, driverName: drv ? `${drv.firstName} ${drv.lastName}` : null,
-      facilityId: a.facilityId, facilityName: fac?.name ?? null,
-      latitude: a.latitude, longitude: a.longitude,
-      severity: a.severity, status: a.status, description: a.description,
-      claimNumber: a.claimNumber,
-      alertedAt: a.alertedAt?.toISOString() ?? new Date().toISOString(),
-      resolvedAt: a.resolvedAt?.toISOString() ?? null,
+      driverId: d.id,
+      driverName: `${d.firstName} ${d.lastName}`,
+      facilityName: fac?.name ?? "Unknown",
+      riskScore: d.riskScore,
+      riskTier: d.riskTier,
+      topIssue,
     };
   });
+
+  const where = scopeWhere(telematicsEventsTable.facilityId, req.scopeFacilityIds);
   return res.json(result);
 });
 
-router.get("/dashboard/top-risk-drivers", async (req, res) => {
+router.get("/dashboard/telematics-activity", async (req, res) => {
+  // Scope events through vehicles in the user's facilities
   const facilities = await getScopedFacilities(req.scopeFacilityIds);
   const facilityIds = facilities.map(f => f.id);
 
@@ -139,6 +144,8 @@ router.get("/dashboard/top-risk-drivers", async (req, res) => {
       topIssue,
     };
   });
+
+  const where = scopeWhere(telematicsEventsTable.facilityId, req.scopeFacilityIds);
   return res.json(result);
 });
 
