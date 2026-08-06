@@ -83,6 +83,41 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
     db.select().from(driversTable).where(scopeWhere(driversTable.facilityId, facilityIds)!),
   ]);
 
+  const sorted = [...accidents]
+    .sort((a, b) => new Date(b.alertedAt ?? 0).getTime() - new Date(a.alertedAt ?? 0).getTime())
+    .slice(0, 10);
+
+  const result = sorted.map(a => {
+    const veh = vehicles.find((v: any) => v.id === a.vehicleId);
+    const drv = drivers.find((d: any) => d.id === a.driverId);
+    const fac = facilities.find(f => f.id === a.facilityId);
+    return {
+      id: a.id, vehicleId: a.vehicleId, vehiclePlate: veh?.licensePlate ?? null,
+      driverId: a.driverId, driverName: drv ? `${drv.firstName} ${drv.lastName}` : null,
+      facilityId: a.facilityId, facilityName: fac?.name ?? null,
+      latitude: a.latitude, longitude: a.longitude,
+      severity: a.severity, status: a.status, description: a.description,
+      claimNumber: a.claimNumber,
+      alertedAt: a.alertedAt?.toISOString() ?? new Date().toISOString(),
+      resolvedAt: a.resolvedAt?.toISOString() ?? null,
+    };
+  });
+  return res.json(result);
+});
+
+router.get("/dashboard/top-risk-drivers", async (req, res) => {
+  const facilities = await getScopedFacilities(req.scopeFacilityIds);
+  const facilityIds = facilities.map(f => f.id);
+
+  if (facilityIds.length === 0) {
+    return res.json([]);
+  }
+
+  const [drivers, vehicles] = await Promise.all([
+    db.select().from(driversTable).where(scopeWhere(driversTable.facilityId, facilityIds)!),
+    db.select().from(vehiclesTable).where(scopeWhere(vehiclesTable.facilityId, facilityIds)!),
+  ]);
+
   // Fetch telematics events scoped to the vehicles in these facilities
   const vehicleIds = vehicles.map(v => v.id);
   const vehicleWhere = scopeWhere(telematicsEventsTable.vehicleId, vehicleIds);
@@ -105,7 +140,7 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
     const fac = facilities.find(f => f.id === d.facilityId);
     const driverEvents = telematicsEvents.filter((e) => e.driverId === d.id);
     const severityOrder: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
-    const topEvent = driverEvents.sort((a, b) =>
+    const topEvent = driverEvents.sort((a: any, b: any) =>
       (severityOrder[b.severity] ?? 0) - (severityOrder[a.severity] ?? 0)
     )[0];
     const topIssue = topEvent ? topEvent.eventType.replace(/_/g, " ") : "No recent events";
@@ -118,7 +153,6 @@ router.get("/dashboard/recent-accidents", async (req, res) => {
       topIssue,
     };
   });
-
   return res.json(result);
 });
 
