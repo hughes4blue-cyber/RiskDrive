@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "VAD34Lu-fvNDMNQzKqPUB"
+uri = "file://.local/outputs/RiskDrive--Platform-Deck.pptx"
+type = "slides"
+title = "RiskDrive™ Platform Deck (PPTX)"
+description = "Downloadable PowerPoint — 9 slides, ready to email to AAA club contacts."
