@@ -90,11 +90,11 @@ export default function Policies() {
 
   useEffect(() => {
     Promise.all([
-      fetch("/api/submissions").then(r => r.json()),
-      fetch("/api/policies").then(r => r.json()),
+      fetch("/api/submissions").then(r => r.json()).catch(() => []),
+      fetch("/api/policies").then(r => r.json()).catch(() => []),
     ]).then(([s, p]) => {
-      setSubmissions(s);
-      setPolicies(p);
+      setSubmissions(Array.isArray(s) ? s : []);
+      setPolicies(Array.isArray(p) ? p : []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
